@@ -84,10 +84,3 @@ export async function getFinalJudgment(specialtyName: string, description: strin
   }
 }
 
-import { GoogleGenAI } from "@google/genai";
-
-const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-
-export const ai = new GoogleGenAI({
-  apiKey,
-});
