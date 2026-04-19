@@ -83,3 +83,11 @@ export async function getFinalJudgment(specialtyName: string, description: strin
     return `El Sombrero ha dictado tu destino: ${specialtyName}. ${description}`;
   }
 }
+
+import { GoogleGenAI } from "@google/genai";
+
+const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+
+export const ai = new GoogleGenAI({
+  apiKey,
+});
