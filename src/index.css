@@ -30,7 +30,7 @@
     /* Custom Gothic Medical Background provided by user */
     background-image: 
       linear-gradient(to bottom, rgba(8, 10, 15, 0.4) 0%, rgba(8, 10, 15, 0.6) 100%),
-      url("/medical-background.png.jpg");
+      url("/medical-background.jpg");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

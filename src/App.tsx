@@ -14,7 +14,7 @@ const HouseCrestDisplay = ({ house }: { house: string }) => {
   const [error, setError] = useState(false);
 
   // User-provided local filenames
-  const localPath = `/${house.toLowerCase()}.png.png`;
+  const localPath = `/${house.toLowerCase()}.png`;
 
   if (error) {
     // Elegant SVG Fallback if image fails
@@ -308,7 +308,7 @@ export default function App() {
                           <h3 className="text-2xl font-magic text-gold italic">{spec.name}</h3>
                           <div className="flex items-center space-x-2">
                             <img 
-                              src={`/${spec.hogwartsHouse.toLowerCase()}.png.png`} 
+                              src={`/${spec.hogwartsHouse.toLowerCase()}.png`} 
                               className="w-6 h-6 object-contain grayscale group-hover:grayscale-0 transition-all opacity-40 group-hover:opacity-100" 
                               alt=""
                             />
