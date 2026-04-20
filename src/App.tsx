@@ -8,46 +8,7 @@ import { PaymentInterface } from './components/PaymentInterface';
 import { QUICK_QUESTIONS, EXTENSIVE_QUESTIONS, SPECIALTIES_MAP, BLOG_POSTS } from './constants';
 import { Scene, Specialty, Option, QuizType, BlogPost } from './types';
 import { getHatThought, getFinalJudgment } from './lib/gemini';
-import { MapPin, ArrowRight, Sparkles, Wand2, FlaskConical, Stethoscope, BookOpen, ScrollText, Shield, ShieldAlert, ShieldCheck, CheckCircle2, Circle, CreditCard, Zap, Crown, Newspaper, Calendar, User, ArrowLeft } from 'lucide-react';
-
-const HouseCrestDisplay = ({ house }: { house: string }) => {
-  const [error, setError] = useState(false);
-
-  // User-provided local filenames
-  const localPath = `/${house.toLowerCase()}.png`;
-
-  if (error) {
-    // Elegant SVG Fallback if image fails
-    const colors: Record<string, string> = {
-      Gryffindor: "#991b1b",
-      Slytherin: "#166534",
-      Ravenclaw: "#1e40af",
-      Hufflepuff: "#854d0e"
-    };
-
-    return (
-      <div className="flex flex-col items-center space-y-2">
-        <div className="relative">
-          <Shield size={120} color={colors[house]} className="drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
-          <div className="absolute inset-0 flex items-center justify-center">
-             <span className="text-4xl font-bold text-white drop-shadow-md">{house[0]}</span>
-          </div>
-        </div>
-        <span className="text-[10px] uppercase tracking-widest text-parchment/40">Sello de {house}</span>
-      </div>
-    );
-  }
-
-  return (
-    <img 
-      src={localPath}
-      alt={`${house} Crest`}
-      onError={() => setError(true)}
-      className="w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
-      referrerPolicy="no-referrer"
-    />
-  );
-};
+import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, Shield, CheckCircle2, Circle, CreditCard, Zap, Crown, Newspaper, Calendar, User, ArrowLeft } from 'lucide-react';
 
 export default function App() {
   const [scene, setScene] = useState<Scene | 'ABOUT' | 'SPECIALTIES' | 'BLOG'>('HOME');
@@ -55,6 +16,7 @@ export default function App() {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [hatThought, setHatThought] = useState<string>('"Veo un pulso firme... pero una mente que se deleita en el caos de lo inmediato..."');
+  const [usedThoughts, setUsedThoughts] = useState<string[]>([]);
   const [showThought, setShowThought] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [result, setResult] = useState<Specialty | null>(null);
@@ -65,7 +27,7 @@ export default function App() {
     return quizType === 'EXTENSIVE' ? EXTENSIVE_QUESTIONS : QUICK_QUESTIONS;
   }, [quizType]);
 
-  const progress = Math.round(((currentQuestionIdx) / activeQuestions.length) * 100);
+  const progress = Math.round(((currentQuestionIdx + 1) / activeQuestions.length) * 100);
 
   const currentQuestion = activeQuestions[currentQuestionIdx];
 
@@ -77,6 +39,7 @@ export default function App() {
     setQuizType(type);
     setCurrentQuestionIdx(0);
     setAnswers([]);
+    setUsedThoughts([]);
     setResult(null);
     setScene('QUIZ');
     setShowThought(true);
@@ -103,33 +66,64 @@ export default function App() {
     }
   };
 
-  const calculateResult = (finalAnswers: string[]) => {
-    const counts: Record<string, number> = {};
-    finalAnswers.forEach(ans => {
-      counts[ans] = (counts[ans] || 0) + 1;
-    });
-
-    let topSpecialty = "INTERNAL_MEDICINE";
-    let max = 0;
-    Object.entries(counts).forEach(([id, count]) => {
-      if (count > max) {
-        max = count;
-        topSpecialty = id;
-      }
-    });
-
-    return SPECIALTIES_MAP[topSpecialty] || SPECIALTIES_MAP["INTERNAL_MEDICINE"];
-  };
-
   const handleOptionSelect = async (option: Option) => {
     if (isThinking) return;
 
     const newAnswers = [...answers, option.alignment];
     setAnswers(newAnswers);
 
+    const calculateResultInternal = (finalAnswers: string[]) => {
+      const counts: Record<string, number> = {};
+      finalAnswers.forEach(ans => {
+        counts[ans] = (counts[ans] || 0) + 1;
+      });
+
+      let topSpecialty = "INTERNAL_MEDICINE";
+      let max = 0;
+      Object.entries(counts).forEach(([id, count]) => {
+        if (count > max) {
+          max = count;
+          topSpecialty = id;
+        }
+      });
+
+      return SPECIALTIES_MAP[topSpecialty] || SPECIALTIES_MAP["INTERNAL_MEDICINE"];
+    };
+
     if (currentQuestionIdx < activeQuestions.length - 1) {
       setIsThinking(true);
-      setShowThought(false);
+      setShowThought(true);
+      
+      const quickMumbles = [
+        "Mmm... previsible, como una gripe en invierno.", 
+        "¿De verdad? Tu corteza cerebral parece estar de vacaciones.", 
+        "Curiosa falta de criterio... huelo una negligencia intelectual inminente.", 
+        "Vaya, otra mente que confunde la medicina con un pasatiempo.", 
+        "Típico de tu clase... mucho ego y poca sustancia anatómica.",
+        "Interesante (y no en el buen sentido)... esto acabará en autopsia.",
+        "Hmm, qué poca imaginación... eres tan plano como un ECG de un muerto.",
+        "Diagnóstico: Predecible. Prescribo dos dosis de humildad.",
+        "Huelo... mediocridad. Y un poco de miedo ante el bisturí.",
+        "¿Eso es todo? He visto amebas con planes más ambiciosos.",
+        "Tiembla el bisturí... tus nervios están más tensos que una sutura mal hecha.",
+        "Veo un patrón... preocupante. Parece una arritmia de decisiones.",
+        "Inquietante elección. Como recetar morfina para un estornudo.",
+        "¿Quién te dejó entrar? Tu expediente debe ser pura ficción.",
+        "Mmm, arrogante. Tienes el complejo de Dios pero sin los milagros.",
+        "Típico síntoma de aprendiz que se cree eminencia.",
+        "Ni el éter te salvará de esa estupidez que acabas de elegir.",
+        "Ya veo hacia dónde vas. Directo al fracaso clínico.",
+        "¿Esa es tu respuesta final? Pobre alma, tu destino está en cuidados paliativos.",
+        "Sigo buscando tu intelecto... debe estar escondido bajo esa capa."
+      ];
+      
+      // Filter out used quick mumbles to ensure variety
+      const availableMumbles = quickMumbles.filter(m => !usedThoughts.includes(m));
+      const mumblePool = availableMumbles.length > 0 ? availableMumbles : quickMumbles;
+      const selectedMumble = mumblePool[Math.floor(Math.random() * mumblePool.length)];
+      
+      setHatThought(selectedMumble);
+      setUsedThoughts(prev => [...prev, selectedMumble]);
       
       // Snappy transition to next question
       setTimeout(() => {
@@ -137,20 +131,19 @@ export default function App() {
         setIsThinking(false);
       }, 400);
 
-      // Get AI reflection in the background to not block the UI
-      getHatThought(
-        [...answers], 
-        currentQuestion.text, 
-        option.text
-      ).then(thought => {
+      // Get AI reflection
+      getHatThought([...answers], currentQuestion.text, option.text, usedThoughts).then(thought => {
         setHatThought(thought);
-        setShowThought(true);
+        setUsedThoughts(prev => [...prev, thought]);
       });
     } else {
-      // End of quiz - Still needs some ceremony but faster
+      // End of quiz - Reaction to last answer first
+      setShowThought(true);
+      setHatThought("Ya veo... tu destino está sellado...");
+      
       setIsThinking(true);
       setScene('THINK');
-      const finalResult = calculateResult(newAnswers);
+      const finalResult = calculateResultInternal(newAnswers);
       setResult(finalResult);
 
       getFinalJudgment(
@@ -188,7 +181,7 @@ export default function App() {
                 animate={{ opacity: 0.8, y: 0 }}
                 className="text-gold uppercase tracking-[0.4em] text-[10px] sm:text-xs font-magic font-medium"
               >
-                Academia de Sabiduría Médica Arcana
+                Algoritmo de Orientación Vocacional Médica
               </motion.p>
               <motion.h1 
                 initial={{ opacity: 0 }}
@@ -206,23 +199,48 @@ export default function App() {
           
           {/* Only show Hat in Home and Desktop Quiz/Result scenes */}
           {['HOME', 'RESULT', 'THINK', 'QUIZ'].includes(scene) && (
-            <div className={`relative flex flex-col items-center flex-shrink-0 ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'hidden lg:flex lg:sticky lg:top-24 lg:w-[400px]' : 'w-full'}`}>
+            <div className={`relative flex flex-col items-center flex-shrink-0 ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'hidden lg:flex lg:sticky lg:top-24 lg:w-[350px]' : 'w-full'}`}>
               <SortingHat thinking={isThinking} />
               
-              {/* Thought Bubble - Absolute for Home */}
-              <AnimatePresence mode='wait'>
-                {showThought && (
-                  <motion.div
-                    key={hatThought}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 0.8, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="sm:absolute sm:top-10 sm:-right-80 w-full sm:w-72 p-6 border-l border-gold-dim bg-gold-dim/5 text-gold italic font-sans text-lg sm:text-xl text-center sm:text-left backdrop-blur-sm"
-                  >
-                    <TypewriterText text={hatThought} speed={25} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Thought Bubble - Redesigned: Spectral Glass Aesthetic */}
+              <div className="w-full relative min-h-[160px] flex justify-center perspective-[1000px]">
+                <AnimatePresence mode='wait'>
+                  {showThought && (
+                    <motion.div
+                      key={hatThought}
+                      initial={{ opacity: 0, scale: 0.9, rotateX: -10, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ type: "spring", damping: 20, stiffness: 100 }}
+                      className="mt-6 relative w-full p-8 bg-black/40 backdrop-blur-xl border border-gold/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(197,160,89,0.1)] overflow-hidden"
+                    >
+                      {/* Decorative Corner Accents */}
+                      <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-gold/40 rounded-tl-lg" />
+                      <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-gold/40 rounded-tr-lg" />
+                      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-gold/40 rounded-bl-lg" />
+                      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-gold/40 rounded-br-lg" />
+                      
+                      {/* Pointing Tail Wrapper */}
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rotate-45 bg-black/40 border-t border-l border-gold/30 backdrop-blur-xl" />
+
+                      <div className="relative z-10">
+                        <TypewriterText 
+                          text={hatThought} 
+                          speed={25} 
+                          className="text-gold/90 italic font-sans text-2xl leading-relaxed tracking-tight text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+                        />
+                      </div>
+
+                      {/* Moving light sweep effect */}
+                      <motion.div 
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/5 to-transparent skew-x-12"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
 
@@ -238,8 +256,8 @@ export default function App() {
                   className="flex flex-col items-center text-center space-y-8 py-12"
                 >
                   <p className="text-xl sm:text-2xl text-parchment/80 max-w-lg font-classic italic leading-relaxed">
-                    Aspirante, el antiguo Sombrero de la Esencia ha despertado. 
-                    Busca leer entre los pliegues de tu alma para revelar tu destino en las artes curativas.
+                    Aspirante, el sistema de orientación avanzada ha sido activado. 
+                    Permita que el algoritmo analice su perfil profesional para revelar su especialidad idónea.
                   </p>
                   <button
                     onClick={handleStart}
@@ -271,12 +289,10 @@ export default function App() {
                   </div>
                   <div className="space-y-6 text-lg opacity-80 italic">
                     <p>
-                      La Academia Arcanum Medicum fue fundada en el cruce de la ciencia tangible y el conocimiento etéreo. 
-                      Nuestra misión es asegurar que cada sanador encuentre la senda que no solo ejerza con sus manos, sino que resuene con su esencia.
+                      Nuestro sistema de orientación vocacional médica ha sido desarrollado para ayudar a los profesionales y estudiantes a identificar la especialidad que mejor se alinea con su perfil cognitivo, habilidades técnicas y preferencias asistenciales.
                     </p>
                     <p>
-                      El Sombrero de la Esencia utiliza una evaluación psicológica-arcana para medir cuatro pilares fundamentales: 
-                      Dinamismo, Análisis, Estructura y Empatía. Al final de tu viaje consciente, tu destino quedará sellado bajo la égida de una de nuestras seis Grandes Sendas.
+                      A través de una serie de dilemas clínicos y situaciones de práctica diaria, el algoritmo analiza cuatro dimensiones clave: Resolución Técnica, Gestión de Crisis, Razonamiento Diagnóstico y Atención Social.
                     </p>
                   </div>
                   <button 
@@ -298,7 +314,7 @@ export default function App() {
                 >
                   <div className="flex items-center space-x-4 border-b border-gold/20 pb-4 sticky top-0 bg-bg-deep/80 backdrop-blur z-10">
                     <BookOpen className="text-gold" size={32} />
-                    <h2 className="text-3xl font-display font-bold italic tracking-wide magic-shadow text-parchment">Grimorio de las Sendas</h2>
+                    <h2 className="text-3xl font-display font-bold italic tracking-wide magic-shadow text-parchment">Catálogo de Especialidades</h2>
                   </div>
                   
                   <div className="grid grid-cols-1 gap-8">
@@ -306,21 +322,16 @@ export default function App() {
                       <div key={spec.id} className="group border-l-2 border-gold/20 pl-6 space-y-2 hover:border-gold transition-colors">
                         <div className="flex items-center justify-between">
                           <h3 className="text-2xl font-magic text-gold italic">{spec.name}</h3>
-                          <div className="flex items-center space-x-2">
-                            <img 
-                              src={`/${spec.hogwartsHouse.toLowerCase()}.png`} 
-                              className="w-6 h-6 object-contain grayscale group-hover:grayscale-0 transition-all opacity-40 group-hover:opacity-100" 
-                              alt=""
-                            />
-                            <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-tighter rounded-sm border ${
-                              spec.hogwartsHouse === 'Gryffindor' ? 'text-red-500 border-red-500/30' :
-                              spec.hogwartsHouse === 'Slytherin' ? 'text-green-500 border-green-500/30' :
-                              spec.hogwartsHouse === 'Ravenclaw' ? 'text-blue-400 border-blue-400/30' :
-                              'text-yellow-500 border-yellow-500/30'
+                          {spec.hogwartsHouse && (
+                            <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border ${
+                              spec.hogwartsHouse === 'Gryffindor' ? 'text-red-400 border-red-900/50 bg-red-900/10' :
+                              spec.hogwartsHouse === 'Slytherin' ? 'text-emerald-400 border-emerald-900/50 bg-emerald-900/10' :
+                              spec.hogwartsHouse === 'Ravenclaw' ? 'text-blue-400 border-blue-900/50 bg-blue-900/10' :
+                              'text-yellow-400 border-yellow-900/50 bg-yellow-900/10'
                             }`}>
-                              {spec.hogwartsHouse}
+                              Casa {spec.hogwartsHouse}
                             </span>
-                          </div>
+                          )}
                         </div>
                         <p className="text-parchment/60 font-sans italic">{spec.description}</p>
                         <div className="flex flex-wrap gap-2 pt-2">
@@ -344,8 +355,8 @@ export default function App() {
                 >
                   <div className="space-y-4">
                     <Crown className="text-gold mx-auto" size={48} />
-                    <h2 className="text-3xl font-display font-bold text-parchment tracking-widest magic-shadow uppercase">Elige tu Senda de Juicio</h2>
-                    <p className="text-parchment/60 italic font-magic">¿Qué profundidad de introspección buscas hoy?</p>
+                    <h2 className="text-3xl font-display font-bold text-parchment tracking-widest uppercase">Evaluación de Especialidad Médica</h2>
+                    <p className="text-parchment/60 italic font-sans">Identifique su perfil profesional mediante nuestro algoritmo de orientación vocacional.</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -356,11 +367,11 @@ export default function App() {
                     >
                       <Zap size={32} className="text-gold-dim group-hover:text-gold" />
                       <div>
-                        <h3 className="text-xl text-parchment font-sans tracking-wide">Juicio Fugaz</h3>
-                        <p className="text-[10px] text-parchment/40 uppercase tracking-widest mt-1">Gratis</p>
+                        <h3 className="text-xl text-parchment font-sans tracking-wide">Evaluación Básica</h3>
+                        <p className="text-[10px] text-parchment/40 uppercase tracking-widest mt-1">Acceso Gratuito</p>
                       </div>
                       <p className="text-xs text-parchment/60 leading-relaxed italic">
-                        7 dictámenes esenciales para vislumbrar tu senda médica de forma rápida.
+                        12 preguntas esenciales para un perfilado rápido de su área de interés.
                       </p>
                     </button>
 
@@ -371,11 +382,11 @@ export default function App() {
                     >
                       <Sparkles size={32} className="text-gold" />
                       <div>
-                        <h3 className="text-xl text-gold font-sans tracking-wide">Examen Arcano</h3>
+                        <h3 className="text-xl text-gold font-sans tracking-wide">Perfil Profesional Completo</h3>
                         <p className="text-[10px] text-gold/80 font-bold uppercase tracking-widest mt-1">Acceso Premium</p>
                       </div>
                       <p className="text-xs text-parchment/70 leading-relaxed italic">
-                        21 dictámenes profundos. Revela tu especialidad con máxima precisión y detalle.
+                        60 ítems detallados. Obtenga un informe exhaustivo de compatibilidad con todas las especialidades.
                       </p>
                     </button>
                   </div>
@@ -405,7 +416,7 @@ export default function App() {
 
                     <div className="bg-white/5 p-6 rounded-sm border border-gold/10 space-y-4">
                       <div className="flex justify-between items-center text-parchment">
-                        <span className="font-magic text-sm tracking-wide">Examen de 21 Dictámenes</span>
+                        <span className="font-magic text-sm tracking-wide">Examen de 60 Dictámenes</span>
                         <span className="font-mono text-gold font-bold">4.99 EUR</span>
                       </div>
                     </div>
@@ -430,48 +441,67 @@ export default function App() {
                   exit={{ opacity: 0, y: -20 }}
                   className="glass-surface p-6 sm:p-12 space-y-6 sm:space-y-8 w-full shadow-2xl relative overflow-visible"
                 >
-                  <div className="sticky top-0 lg:static z-30 bg-academy-navy/95 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none -mx-6 -mt-6 p-4 sm:p-6 rounded-t-sm border-b border-gold/10 lg:border-none lg:m-0 lg:p-0 flex items-center gap-4">
-                    {/* Mobile Integrated Hat */}
-                    <div className="lg:hidden flex-shrink-0 bg-gold/5 border border-gold/20 p-2 rounded-full overflow-visible w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center shadow-[0_0_20px_rgba(197,160,89,0.3)]">
-                       <div className="scale-125 sm:scale-150">
-                        <SortingHat thinking={isThinking} compact />
-                       </div>
-                    </div>
-                    
-                    <div className="space-y-1 sm:space-y-2 flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gold-dim text-[8px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-sans">
-                          {currentQuestion.label}
-                        </span>
-                        {isThinking && (
-                          <motion.span 
-                            animate={{ opacity: [0.4, 1, 0.4] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                            className="text-medical-teal text-[8px] uppercase font-magic"
-                          >
-                            Pensando...
-                          </motion.span>
-                        )}
+                  <div className="sticky top-0 lg:static z-40 bg-academy-navy/95 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none -mx-6 -mt-6 rounded-t-sm border-b border-gold/10 lg:border-none lg:m-0 flex flex-col">
+                    <div className="p-4 sm:p-6 flex items-start gap-4 pt-5">
+                      {/* Mobile Hat Icon only */}
+                      <div className="lg:hidden flex-shrink-0 bg-gold/5 border border-gold/20 p-1 rounded-full w-16 h-16 sm:w-24 sm:h-24 flex items-center justify-center shadow-[0_0_15px_rgba(197,160,89,0.2)]">
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <SortingHat compact thinking={isThinking} />
+                        </div>
                       </div>
-                      <h2 className="text-base sm:text-3xl text-parchment leading-tight font-sans font-semibold italic lg:line-clamp-none">
-                        {currentQuestion.text}
-                      </h2>
                       
-                      {/* Mobile Thought - Discreet line */}
-                      <AnimatePresence mode='wait'>
-                        {showThought && (
-                          <motion.div
-                            key={hatThought}
-                            initial={{ opacity: 0, y: -5 }}
-                            animate={{ opacity: 0.7, y: 0 }}
-                            exit={{ opacity: 0, y: 5 }}
-                            className="lg:hidden text-gold italic font-sans text-[9px] sm:text-xs tracking-tight border-l border-gold/30 pl-2 mt-1"
-                          >
-                            "{hatThought}"
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      <div className="space-y-1 flex-1 pt-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gold-dim text-[8px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-sans">
+                            {currentQuestion.label}
+                          </span>
+                          {isThinking && (
+                            <motion.span 
+                              animate={{ opacity: [0.4, 1, 0.4] }}
+                              transition={{ duration: 1.5, repeat: Infinity }}
+                              className="text-medical-teal text-[8px] uppercase font-magic"
+                            >
+                              Pensando...
+                            </motion.span>
+                          )}
+                        </div>
+                        <h2 className="text-base sm:text-2xl text-parchment leading-tight font-sans font-semibold italic lg:line-clamp-none">
+                          {currentQuestion.text}
+                        </h2>
+                      </div>
                     </div>
+
+                    {/* Mobile Thought Bubble - Spectral Ribbon below the hat row */}
+                    <AnimatePresence mode='wait'>
+                      {showThought && (
+                        <motion.div
+                          key={hatThought}
+                          initial={{ opacity: 0, height: 0, y: -10 }}
+                          animate={{ opacity: 1, height: 'auto', y: 0 }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="lg:hidden px-6 pb-6 relative"
+                        >
+                          {/* Pointer to the hat */}
+                          <div className="absolute top-[-4px] left-12 w-4 h-4 rotate-45 bg-academy-navy border-t border-l border-gold/20 z-10" />
+                          
+                          <div className="relative p-4 bg-black/30 backdrop-blur-lg border border-gold/20 rounded-xl shadow-2xl overflow-hidden group">
+                            <div className="text-gold italic font-sans text-sm sm:text-base text-center leading-snug tracking-wide relative z-10">
+                              "{hatThought}"
+                            </div>
+                            
+                            {/* Animated mist background */}
+                            <motion.div 
+                              animate={{ 
+                                opacity: [0.05, 0.1, 0.05],
+                                scale: [1, 1.1, 1]
+                              }}
+                              transition={{ duration: 4, repeat: Infinity }}
+                              className="absolute inset-0 bg-radial-gradient from-gold/10 to-transparent pointer-events-none" 
+                            />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 pt-2">
@@ -534,47 +564,49 @@ export default function App() {
                   <div className="space-y-4">
                     <AnimatePresence mode="wait">
                       <motion.div
-                        key={result.hogwartsHouse}
-                        initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         transition={{ 
                           type: "spring",
                           stiffness: 260,
                           damping: 20,
                           delay: 0.2
                         }}
-                        className="relative w-32 h-32 sm:w-48 sm:h-48 mx-auto mb-6 flex items-center justify-center"
+                        className="relative w-32 h-32 sm:w-48 sm:h-48 mx-auto mb-6 flex items-center justify-center bg-gold/10 rounded-full border border-gold/30 shadow-[0_0_30px_rgba(197,160,89,0.2)]"
                       >
-                        {/* High Fidelity House Crests with Fallback */}
-                        <HouseCrestDisplay house={result.hogwartsHouse} />
-                        
-                        {/* House specific aura */}
-                        <div className={`absolute inset-0 blur-[40px] opacity-20 -z-10 rounded-full ${
-                          result.hogwartsHouse === 'Gryffindor' ? 'bg-red-600' :
-                          result.hogwartsHouse === 'Slytherin' ? 'bg-green-600' :
-                          result.hogwartsHouse === 'Ravenclaw' ? 'bg-blue-600' :
-                          'bg-yellow-600'
-                        }`} />
+                         <Stethoscope size={80} className="text-gold" />
                       </motion.div>
                     </AnimatePresence>
 
                     <span className="text-medical-teal uppercase tracking-[0.5em] text-[10px] font-sans font-medium">
-                      Tu Casa de Sabiduría ha sido Revelada
+                      Su perfil profesional ha sido identificado
                     </span>
                     <h2 className="text-4xl sm:text-6xl text-parchment font-display font-bold tracking-widest magic-shadow underline underline-offset-8 decoration-gold/30">
                       {result.name}
                     </h2>
-                    <div className="flex items-center justify-center space-x-2 pt-2">
-                       <span className="text-gold-dim text-[10px] uppercase tracking-widest">Esencia de Hogwarts:</span>
-                       <span className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full border ${
-                         result.hogwartsHouse === 'Gryffindor' ? 'text-red-500 border-red-500/30 bg-red-500/5' :
-                         result.hogwartsHouse === 'Slytherin' ? 'text-green-500 border-green-500/30 bg-green-500/5' :
-                         result.hogwartsHouse === 'Ravenclaw' ? 'text-blue-400 border-blue-400/30 bg-blue-400/5' :
-                         'text-yellow-500 border-yellow-500/30 bg-yellow-500/5'
-                       }`}>
-                         {result.hogwartsHouse}
-                       </span>
-                    </div>
+                    {result.hogwartsHouse && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="flex items-center justify-center space-x-2 mt-4"
+                      >
+                        <Shield className={`w-5 h-5 ${
+                          result.hogwartsHouse === 'Gryffindor' ? 'text-red-500' :
+                          result.hogwartsHouse === 'Slytherin' ? 'text-emerald-500' :
+                          result.hogwartsHouse === 'Ravenclaw' ? 'text-blue-500' :
+                          'text-yellow-500'
+                        }`} />
+                        <span className={`text-sm uppercase tracking-[0.3em] font-bold ${
+                          result.hogwartsHouse === 'Gryffindor' ? 'text-red-400' :
+                          result.hogwartsHouse === 'Slytherin' ? 'text-emerald-400' :
+                          result.hogwartsHouse === 'Ravenclaw' ? 'text-blue-400' :
+                          'text-yellow-400'
+                        }`}>
+                          Legado de {result.hogwartsHouse}
+                        </span>
+                      </motion.div>
+                    )}
                   </div>
 
                   <div className="space-y-4 text-parchment/90 font-sans text-xl sm:text-2xl leading-relaxed italic max-w-xl mx-auto py-6 border-y border-gold/20">

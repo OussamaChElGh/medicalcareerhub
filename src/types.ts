@@ -18,7 +18,7 @@ export interface Specialty {
   description: string;
   alternatives: string[];
   rationale: string;
-  hogwartsHouse: 'Gryffindor' | 'Hufflepuff' | 'Ravenclaw' | 'Slytherin';
+  hogwartsHouse?: 'Gryffindor' | 'Slytherin' | 'Ravenclaw' | 'Hufflepuff';
 }
 
 export interface BlogPost {

@@ -13,7 +13,7 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
   const sortingHatSrc = "/sorting-hat.png";
 
   return (
-    <div className={`relative ${compact ? 'w-24 h-24 xs:w-32 xs:h-32 sm:w-56 sm:h-56' : 'w-56 h-56 sm:w-72 sm:h-72'} md:w-96 md:h-96 flex items-center justify-center transition-all duration-700`}>
+    <div className={`relative ${compact ? 'w-24 h-24 xs:w-32 xs:h-32 sm:w-36 sm:h-36' : 'w-56 h-56 sm:w-72 sm:h-72'} md:w-96 md:h-96 flex items-center justify-center transition-all duration-700`}>
       {/* Background Glow - Medical Magic */}
       <motion.div
         animate={{
