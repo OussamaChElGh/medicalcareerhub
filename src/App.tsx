@@ -172,11 +172,11 @@ export default function App() {
     <AtmosphericFrame>
       <Navbar onNavigate={handleNavigate} activeScene={scene} />
       
-      <div className={`relative w-full flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center px-4 sm:px-6 md:px-12'} py-10 sm:py-20 transition-all duration-500`}>
+      <div className={`relative w-full flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center px-4 sm:px-6 md:px-12'} ${['QUIZ', 'THINK'].includes(scene) ? 'pt-16 pb-8 sm:pt-32 sm:pb-8' : 'pt-24 pb-10 sm:pt-40 sm:pb-20'} transition-all duration-500`}>
         
         {/* Header - More flexible positioning */}
         <AnimatePresence>
-          {scene !== 'BLOG' && (
+          {scene !== 'BLOG' && scene !== 'QUIZ' && scene !== 'THINK' && scene !== 'RESULT' && (
             <motion.header 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
@@ -202,14 +202,14 @@ export default function App() {
         </AnimatePresence>
 
         {/* Main Stage */}
-        <main className={`w-full ${scene === 'BLOG' ? 'max-w-none' : ['ABOUT', 'SPECIALTIES'].includes(scene) ? 'max-w-6xl mx-auto' : 'max-w-4xl mx-auto'} flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center'} flex-grow space-y-4 md:space-y-6 transition-all duration-500`}>
+        <main className={`w-full ${scene === 'BLOG' ? 'max-w-none' : ['ABOUT', 'SPECIALTIES'].includes(scene) ? 'max-w-6xl mx-auto' : 'max-w-6xl mx-auto'} flex flex-col ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-row lg:items-start lg:gap-12' : 'items-center'} flex-grow space-y-4 md:space-y-6 transition-all duration-700`}>
           
-          {/* Only show Hat in Home and Quiz/Result scenes */}
-          {['HOME', 'QUIZ', 'RESULT', 'THINK'].includes(scene) && (
-            <div className="relative flex flex-col items-center">
+          {/* Only show Hat in Home and Desktop Quiz/Result scenes */}
+          {['HOME', 'RESULT', 'THINK', 'QUIZ'].includes(scene) && (
+            <div className={`relative flex flex-col items-center flex-shrink-0 ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'hidden lg:flex lg:sticky lg:top-24 lg:w-[400px]' : 'w-full'}`}>
               <SortingHat thinking={isThinking} />
               
-              {/* Thought Bubble */}
+              {/* Thought Bubble - Absolute for Home */}
               <AnimatePresence mode='wait'>
                 {showThought && (
                   <motion.div
@@ -217,7 +217,7 @@ export default function App() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 0.8, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="sm:absolute top-10 sm:-right-80 w-full sm:w-72 p-6 border-l border-gold-dim bg-gold-dim/5 text-gold italic font-sans text-lg sm:text-xl text-center sm:text-left backdrop-blur-sm"
+                    className="sm:absolute sm:top-10 sm:-right-80 w-full sm:w-72 p-6 border-l border-gold-dim bg-gold-dim/5 text-gold italic font-sans text-lg sm:text-xl text-center sm:text-left backdrop-blur-sm"
                   >
                     <TypewriterText text={hatThought} speed={25} />
                   </motion.div>
@@ -227,7 +227,7 @@ export default function App() {
           )}
 
           {/* Interactive Area */}
-          <div className="w-full max-w-2xl">
+          <div className={`w-full ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-grow lg:max-w-none' : 'max-w-2xl'}`}>
             <AnimatePresence mode="wait">
               {scene === 'HOME' && (
                 <motion.div 
@@ -428,29 +428,64 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="glass-surface p-8 sm:p-12 space-y-8 w-full shadow-2xl relative overflow-hidden"
+                  className="glass-surface p-6 sm:p-12 space-y-6 sm:space-y-8 w-full shadow-2xl relative overflow-visible"
                 >
-                  <div className="space-y-4">
-                    <span className="text-gold-dim text-[10px] uppercase tracking-[0.3em] font-sans">
-                      {currentQuestion.label}
-                    </span>
-                    <h2 className="text-2xl sm:text-3xl text-parchment leading-tight font-sans font-semibold italic">
-                      {currentQuestion.text}
-                    </h2>
+                  <div className="sticky top-0 lg:static z-30 bg-academy-navy/95 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none -mx-6 -mt-6 p-4 sm:p-6 rounded-t-sm border-b border-gold/10 lg:border-none lg:m-0 lg:p-0 flex items-center gap-4">
+                    {/* Mobile Integrated Hat */}
+                    <div className="lg:hidden flex-shrink-0 bg-gold/5 border border-gold/20 p-2 rounded-full overflow-visible w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center shadow-[0_0_20px_rgba(197,160,89,0.3)]">
+                       <div className="scale-125 sm:scale-150">
+                        <SortingHat thinking={isThinking} compact />
+                       </div>
+                    </div>
+                    
+                    <div className="space-y-1 sm:space-y-2 flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gold-dim text-[8px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] font-sans">
+                          {currentQuestion.label}
+                        </span>
+                        {isThinking && (
+                          <motion.span 
+                            animate={{ opacity: [0.4, 1, 0.4] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="text-medical-teal text-[8px] uppercase font-magic"
+                          >
+                            Pensando...
+                          </motion.span>
+                        )}
+                      </div>
+                      <h2 className="text-base sm:text-3xl text-parchment leading-tight font-sans font-semibold italic lg:line-clamp-none">
+                        {currentQuestion.text}
+                      </h2>
+                      
+                      {/* Mobile Thought - Discreet line */}
+                      <AnimatePresence mode='wait'>
+                        {showThought && (
+                          <motion.div
+                            key={hatThought}
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 0.7, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="lg:hidden text-gold italic font-sans text-[9px] sm:text-xs tracking-tight border-l border-gold/30 pl-2 mt-1"
+                          >
+                            "{hatThought}"
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 pt-2">
                     {currentQuestion.options.map((option) => (
                       <button
                         key={option.id}
                         disabled={isThinking}
                         onClick={() => handleOptionSelect(option)}
-                        className="group flex items-center justify-between p-4 sm:p-5 border border-gold/30 bg-gold/5 hover:bg-gold/20 hover:border-gold transition-all text-left disabled:opacity-50"
+                        className="group flex items-center justify-between p-3 sm:p-5 border border-gold/30 bg-gold/5 hover:bg-gold/20 hover:border-gold transition-all text-left disabled:opacity-50"
                       >
-                        <span className="text-parchment group-hover:text-gold transition-colors font-magic text-base sm:text-lg pr-4">
+                        <span className="text-parchment group-hover:text-gold transition-colors font-magic text-sm sm:text-lg pr-2 sm:pr-4">
                           {option.text}
                         </span>
-                        <span className="text-gold/50 group-hover:text-gold text-lg sm:text-xl transition-all flex-shrink-0">
+                        <span className="text-gold/50 group-hover:text-gold text-base sm:text-xl transition-all flex-shrink-0">
                           {option.sigil}
                         </span>
                       </button>
