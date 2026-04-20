@@ -8,6 +8,7 @@ import { PaymentInterface } from './components/PaymentInterface';
 import { QUICK_QUESTIONS, EXTENSIVE_QUESTIONS, SPECIALTIES_MAP, BLOG_POSTS } from './constants';
 import { Scene, Specialty, Option, QuizType, BlogPost } from './types';
 import { getHatThought, getFinalJudgment } from './lib/gemini';
+import { houseImages } from './houseImages';
 import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, Shield, CheckCircle2, Circle, CreditCard, Zap, Crown, Newspaper, Calendar, User, ArrowLeft } from 'lucide-react';
 
 export default function App() {
@@ -323,14 +324,12 @@ export default function App() {
                         <div className="flex items-center justify-between">
                           <h3 className="text-2xl font-magic text-gold italic">{spec.name}</h3>
                           {spec.hogwartsHouse && (
-                            <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border ${
-                              spec.hogwartsHouse === 'Gryffindor' ? 'text-red-400 border-red-900/50 bg-red-900/10' :
-                              spec.hogwartsHouse === 'Slytherin' ? 'text-emerald-400 border-emerald-900/50 bg-emerald-900/10' :
-                              spec.hogwartsHouse === 'Ravenclaw' ? 'text-blue-400 border-blue-900/50 bg-blue-900/10' :
-                              'text-yellow-400 border-yellow-900/50 bg-yellow-900/10'
-                            }`}>
-                              Casa {spec.hogwartsHouse}
-                            </span>
+                            <img 
+                              src={houseImages[spec.hogwartsHouse.toLowerCase()]} 
+                              alt={spec.hogwartsHouse}
+                              className="w-12 h-12 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                              title={`Afinidad: Casa ${spec.hogwartsHouse}`}
+                            />
                           )}
                         </div>
                         <p className="text-parchment/60 font-sans italic">{spec.description}</p>
@@ -572,9 +571,19 @@ export default function App() {
                           damping: 20,
                           delay: 0.2
                         }}
-                        className="relative w-32 h-32 sm:w-48 sm:h-48 mx-auto mb-6 flex items-center justify-center bg-gold/10 rounded-full border border-gold/30 shadow-[0_0_30px_rgba(197,160,89,0.2)]"
+                        className="relative w-40 h-40 sm:w-56 sm:h-56 mx-auto mb-6 flex items-center justify-center drop-shadow-[0_0_40px_rgba(255,255,255,0.1)]"
                       >
-                         <Stethoscope size={80} className="text-gold" />
+                         {result.hogwartsHouse ? (
+                           <img 
+                            src={houseImages[result.hogwartsHouse.toLowerCase()]} 
+                            alt={result.hogwartsHouse} 
+                            className="w-full h-full object-contain"
+                           />
+                         ) : (
+                           <div className="w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center bg-gold/10 rounded-full border border-gold/30 shadow-[0_0_30px_rgba(197,160,89,0.2)]">
+                             <Stethoscope size={80} className="text-gold" />
+                           </div>
+                         )}
                       </motion.div>
                     </AnimatePresence>
 
@@ -589,21 +598,15 @@ export default function App() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="flex items-center justify-center space-x-2 mt-4"
+                        className="flex items-center justify-center mt-6"
                       >
-                        <Shield className={`w-5 h-5 ${
-                          result.hogwartsHouse === 'Gryffindor' ? 'text-red-500' :
-                          result.hogwartsHouse === 'Slytherin' ? 'text-emerald-500' :
-                          result.hogwartsHouse === 'Ravenclaw' ? 'text-blue-500' :
-                          'text-yellow-500'
-                        }`} />
-                        <span className={`text-sm uppercase tracking-[0.3em] font-bold ${
-                          result.hogwartsHouse === 'Gryffindor' ? 'text-red-400' :
-                          result.hogwartsHouse === 'Slytherin' ? 'text-emerald-400' :
-                          result.hogwartsHouse === 'Ravenclaw' ? 'text-blue-400' :
-                          'text-yellow-400'
+                        <span className={`text-base sm:text-lg uppercase tracking-[0.4em] font-bold ${
+                          result.hogwartsHouse === 'Gryffindor' ? 'text-[#ae0001]' :
+                          result.hogwartsHouse === 'Slytherin' ? 'text-[#1a472a]' :
+                          result.hogwartsHouse === 'Ravenclaw' ? 'text-[#222f5b]' :
+                          'text-[#eeb939]'
                         }`}>
-                          Legado de {result.hogwartsHouse}
+                          Casa {result.hogwartsHouse}
                         </span>
                       </motion.div>
                     )}

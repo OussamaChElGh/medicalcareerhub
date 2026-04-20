@@ -27,13 +27,6 @@
     color: var(--color-parchment);
     font-family: var(--font-sans);
     @apply antialiased overflow-x-hidden overflow-y-auto;
-    /* Custom Gothic Medical Background provided by user */
-    background-image: 
-      linear-gradient(to bottom, rgba(8, 10, 15, 0.4) 0%, rgba(8, 10, 15, 0.6) 100%),
-      url("/medical-background.jpg");
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
   }
 }
 

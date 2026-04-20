@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { mediaAssets } from '../mediaAssets';
 
 interface SortingHatProps {
   thinking?: boolean;
@@ -9,8 +10,8 @@ interface SortingHatProps {
 export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => {
   const [imgError, setImgError] = React.useState(false);
 
-  // Path to the image in the public folder
-  const sortingHatSrc = "/sorting-hat.png";
+  // Use embedded image
+  const sortingHatSrc = mediaAssets.sorting_hat_png;
 
   return (
     <div className={`relative ${compact ? 'w-24 h-24 xs:w-32 xs:h-32 sm:w-36 sm:h-36' : 'w-56 h-56 sm:w-72 sm:h-72'} md:w-96 md:h-96 flex items-center justify-center transition-all duration-700`}>
