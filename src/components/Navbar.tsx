@@ -21,7 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeScene }) => {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.8, ease: "circOut" }}
-        className="pointer-events-auto flex items-center bg-bg-deep/70 backdrop-blur-2xl border border-gold/20 rounded-2xl px-2 py-2 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] hover:border-gold/40 transition-all duration-700 max-w-full overflow-x-auto sm:overflow-visible no-scrollbar"
+        className="pointer-events-auto flex items-center bg-academy-navy/90 backdrop-blur-3xl border border-gold/30 rounded-2xl px-2 py-2 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.9)] hover:border-gold/60 transition-all duration-700 max-w-full overflow-x-auto sm:overflow-visible no-scrollbar"
       >
         {/* LOGO SECTION - Now integrated into the pill */}
         <div 
