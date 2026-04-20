@@ -8,7 +8,6 @@ import { PaymentInterface } from './components/PaymentInterface';
 import { QUICK_QUESTIONS, EXTENSIVE_QUESTIONS, SPECIALTIES_MAP, BLOG_POSTS } from './constants';
 import { Scene, Specialty, Option, QuizType, BlogPost } from './types';
 import { getHatThought, getFinalJudgment } from './lib/gemini';
-import { houseImages } from './houseImages';
 import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, Shield, CheckCircle2, Circle, CreditCard, Zap, Crown, Newspaper, Calendar, User, ArrowLeft } from 'lucide-react';
 
 export default function App() {
@@ -325,7 +324,7 @@ export default function App() {
                           <h3 className="text-2xl font-magic text-gold italic">{spec.name}</h3>
                           {spec.hogwartsHouse && (
                             <img 
-                              src={houseImages[spec.hogwartsHouse.toLowerCase()]} 
+                              src={`/${spec.hogwartsHouse.toLowerCase()}.png`} 
                               alt={spec.hogwartsHouse}
                               className="w-12 h-12 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                               title={`Afinidad: Casa ${spec.hogwartsHouse}`}
@@ -575,7 +574,7 @@ export default function App() {
                       >
                          {result.hogwartsHouse ? (
                            <img 
-                            src={houseImages[result.hogwartsHouse.toLowerCase()]} 
+                            src={`/${result.hogwartsHouse.toLowerCase()}.png`} 
                             alt={result.hogwartsHouse} 
                             className="w-full h-full object-contain"
                            />

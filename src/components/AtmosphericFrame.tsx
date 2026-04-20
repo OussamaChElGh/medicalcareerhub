@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { GreatHallCandles } from './FloatingCandle';
-import { mediaAssets } from '../mediaAssets';
 
 export const AtmosphericFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const particles = useMemo(() => {
@@ -15,17 +14,6 @@ export const AtmosphericFrame: React.FC<{ children: React.ReactNode }> = ({ chil
 
   return (
     <div className="relative min-h-screen w-full">
-      {/* Dynamic Background Image */}
-      {mediaAssets.medical_background_jpg && (
-        <div 
-          className="fixed inset-0 z-[-1] pointer-events-none bg-cover bg-center bg-no-repeat w-full h-full"
-          style={{ 
-            backgroundImage: `linear-gradient(to bottom, rgba(8, 10, 15, 0.4) 0%, rgba(8, 10, 15, 0.6) 100%), url(${mediaAssets.medical_background_jpg})`,
-            backgroundAttachment: 'fixed',
-          }}
-        />
-      )}
-
       {/* Fixed Atmospheric Background Layer */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <GreatHallCandles />
