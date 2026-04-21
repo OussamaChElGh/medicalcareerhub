@@ -1,0 +1,6 @@
+# Asegurar que las imágenes se traten como binarios para evitar corrupción en exportaciones
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

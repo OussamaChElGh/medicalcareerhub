@@ -203,7 +203,7 @@ export default function App() {
               <SortingHat thinking={isThinking} />
               
               {/* Thought Bubble - Redesigned: Spectral Glass Aesthetic */}
-              <div className="w-full relative min-h-[160px] flex justify-center perspective-[1000px]">
+              <div className={`w-full relative ${showThought ? 'min-h-[140px]' : 'min-h-0'} flex justify-center perspective-[1000px] transition-all duration-500`}>
                 <AnimatePresence mode='wait'>
                   {showThought && (
                     <motion.div
@@ -253,7 +253,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex flex-col items-center text-center space-y-8 py-12"
+                  className="flex flex-col items-center text-center space-y-6 py-4"
                 >
                   <p className="text-xl sm:text-2xl text-parchment/80 max-w-lg font-classic italic leading-relaxed">
                     Aspirante, el sistema de orientación avanzada ha sido activado. 
