@@ -1,4 +1,11 @@
-# Asegurar que las imágenes se traten como binarios para evitar corrupción en exportaciones
+# Forzar que las imágenes sean tratadas como binarios puros y no se toque el final de línea
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.ico filter=lfs diff=lfs merge=lfs -text
+
+# Configuración estándar para asegurar binarios
 *.png binary
 *.jpg binary
 *.jpeg binary
