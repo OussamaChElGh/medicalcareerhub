@@ -5,6 +5,13 @@
 *.gif filter=lfs diff=lfs merge=lfs -text
 *.ico filter=lfs diff=lfs merge=lfs -text
 
+# Reglas específicas para asegurar que Git no toque estos archivos bajo ningún concepto
+house-gryffindor.png binary
+house-slytherin.png binary
+house-ravenclaw.png binary
+house-hufflepuff.png binary
+magic-sorting-hat.png binary
+
 # Configuración estándar para asegurar binarios
 *.png binary
 *.jpg binary

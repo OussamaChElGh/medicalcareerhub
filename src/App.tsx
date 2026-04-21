@@ -352,10 +352,11 @@ export default function App() {
                           <h3 className="text-2xl font-magic text-gold italic">{spec.name}</h3>
                           {spec.hogwartsHouse && (
                             <img 
-                              src={`/${spec.hogwartsHouse.toLowerCase()}.png`} 
+                              src={`/house-${spec.hogwartsHouse.toLowerCase()}.png`} 
                               alt={spec.hogwartsHouse}
                               className="w-12 h-12 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                               title={`Afinidad: Casa ${spec.hogwartsHouse}`}
+                              referrerPolicy="no-referrer"
                             />
                           )}
                         </div>
@@ -602,9 +603,10 @@ export default function App() {
                       >
                          {result.hogwartsHouse ? (
                            <img 
-                            src={`/${result.hogwartsHouse.toLowerCase()}.png`} 
+                            src={`/house-${result.hogwartsHouse.toLowerCase()}.png`} 
                             alt={result.hogwartsHouse} 
                             className="w-full h-full object-contain"
+                            referrerPolicy="no-referrer"
                            />
                          ) : (
                            <div className="w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center bg-gold/10 rounded-full border border-gold/30 shadow-[0_0_30px_rgba(197,160,89,0.2)]">

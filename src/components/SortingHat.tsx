@@ -10,7 +10,7 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
   const [imgError, setImgError] = React.useState(false);
 
   // Path to the image in the public folder
-  const sortingHatSrc = "/sorting-hat.png";
+  const sortingHatSrc = "/magic-sorting-hat.png";
 
   return (
     <div className={`relative ${compact ? 'w-24 h-24 xs:w-32 xs:h-32 sm:w-36 sm:h-36' : 'w-56 h-56 sm:w-72 sm:h-72'} md:w-96 md:h-96 flex items-center justify-center transition-all duration-700`}>
@@ -49,6 +49,7 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
             src={sortingHatSrc}
             alt="Sombrero Seleccionador de la Esencia"
             onError={() => setImgError(true)}
+            referrerPolicy="no-referrer"
             className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,1)]"
           />
         ) : (
@@ -56,7 +57,7 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
           <svg viewBox="0 0 400 400" className="w-full h-full opacity-60 filter grayscale">
              <path d="M200 40L300 300H100L200 40Z" fill="#3e2723" />
              <path d="M50 300C50 300 50 340 200 340C350 340 350 300 350 300Z" fill="#2b1d14" />
-             <text x="50%" y="65%" textAnchor="middle" fill="#888" fontSize="12" className="italic font-sans">Sube tu imagen a /public/sorting-hat.png</text>
+             <text x="50%" y="65%" textAnchor="middle" fill="#888" fontSize="12" className="italic font-sans">Sube tu imagen a /public/magic-sorting-hat.png</text>
           </svg>
         )}
         
