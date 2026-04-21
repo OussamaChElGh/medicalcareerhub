@@ -165,7 +165,7 @@ export default function App() {
     <AtmosphericFrame>
       <Navbar onNavigate={handleNavigate} activeScene={scene} />
       
-      <div className={`relative w-full flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center px-4 sm:px-6 md:px-12'} ${['QUIZ', 'THINK'].includes(scene) ? 'pt-16 pb-8 sm:pt-32 sm:pb-8' : 'pt-24 pb-10 sm:pt-40 sm:pb-20'} transition-all duration-500`}>
+      <div className={`relative w-full flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center px-4 sm:px-6 md:px-12'} ${['QUIZ', 'THINK'].includes(scene) ? 'pt-8 pb-8 sm:pt-16 sm:pb-8' : 'pt-12 pb-10 sm:pt-20 sm:pb-20'} transition-all duration-500`}>
         
         {/* Header - More flexible positioning */}
         <AnimatePresence>
@@ -253,7 +253,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex flex-col items-center text-center space-y-4 -mt-4 py-0"
+                  className="flex flex-col items-center text-center space-y-4 -mt-20 sm:-mt-32 py-0"
                 >
                   <p className="text-xl sm:text-2xl text-parchment/80 max-w-lg font-classic italic leading-relaxed">
                     Aspirante, el sistema de orientación avanzada ha sido activado. 
