@@ -165,7 +165,7 @@ export default function App() {
     <AtmosphericFrame>
       <Navbar onNavigate={handleNavigate} activeScene={scene} />
       
-      <div className={`relative w-full flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center px-4 sm:px-6 md:px-12'} ${['QUIZ', 'THINK'].includes(scene) ? 'pt-8 pb-8 sm:pt-16 sm:pb-8' : 'pt-12 pb-10 sm:pt-20 sm:pb-20'} transition-all duration-500`}>
+      <div className={`relative w-full flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center px-4 sm:px-6 md:px-12'} ${['QUIZ', 'THINK'].includes(scene) ? 'pt-16 pb-8 sm:pt-32 sm:pb-8' : 'pt-24 pb-10 sm:pt-40 sm:pb-20'} transition-all duration-500`}>
         
         {/* Header - More flexible positioning */}
         <AnimatePresence>
@@ -195,7 +195,7 @@ export default function App() {
         </AnimatePresence>
 
         {/* Main Stage */}
-        <main className={`w-full ${scene === 'BLOG' ? 'max-w-none' : ['ABOUT', 'SPECIALTIES'].includes(scene) ? 'max-w-6xl mx-auto' : 'max-w-6xl mx-auto'} flex flex-col ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-row lg:items-start lg:gap-12 space-y-4 md:space-y-6' : 'items-center space-y-0'} flex-grow transition-all duration-700`}>
+        <main className={`w-full ${scene === 'BLOG' ? 'max-w-none' : ['ABOUT', 'SPECIALTIES'].includes(scene) ? 'max-w-6xl mx-auto' : 'max-w-6xl mx-auto'} flex flex-col ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-row lg:items-start lg:gap-12' : 'items-center'} flex-grow space-y-2 md:space-y-4 transition-all duration-700`}>
           
           {/* Only show Hat in Home and Desktop Quiz/Result scenes */}
           {['HOME', 'RESULT', 'THINK', 'QUIZ'].includes(scene) && (
@@ -203,16 +203,16 @@ export default function App() {
               <SortingHat thinking={isThinking} />
               
               {/* Thought Bubble - Redesigned: Spectral Glass Aesthetic */}
-              <AnimatePresence mode='wait'>
-                {showThought && (
-                  <div className="w-full relative min-h-[140px] flex justify-center perspective-[1000px] mb-6">
+              <div className={`w-full relative ${showThought ? 'min-h-[140px] mt-6' : 'min-h-0 mt-0'} flex justify-center perspective-[1000px] transition-all duration-500`}>
+                <AnimatePresence mode='wait'>
+                  {showThought && (
                     <motion.div
                       key={hatThought}
                       initial={{ opacity: 0, scale: 0.9, rotateX: -10, y: 20 }}
                       animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -10 }}
                       transition={{ type: "spring", damping: 20, stiffness: 100 }}
-                      className="mt-6 relative w-full p-8 bg-black/40 backdrop-blur-xl border border-gold/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(197,160,89,0.1)] overflow-hidden"
+                      className="relative w-full p-8 bg-black/40 backdrop-blur-xl border border-gold/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(197,160,89,0.1)] overflow-hidden"
                     >
                       {/* Decorative Corner Accents */}
                       <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-gold/40 rounded-tl-lg" />
@@ -238,9 +238,9 @@ export default function App() {
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/5 to-transparent skew-x-12"
                       />
                     </motion.div>
-                  </div>
-                )}
-              </AnimatePresence>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
 
@@ -253,7 +253,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex flex-col items-center text-center space-y-4 -mt-20 sm:-mt-32 py-0"
+                  className="flex flex-col items-center text-center space-y-6 py-4"
                 >
                   <p className="text-xl sm:text-2xl text-parchment/80 max-w-lg font-classic italic leading-relaxed">
                     Aspirante, el sistema de orientación avanzada ha sido activado. 
