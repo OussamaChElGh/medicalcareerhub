@@ -259,19 +259,47 @@ export default function App() {
                     Aspirante, el sistema de orientación avanzada ha sido activado. 
                     Permita que el algoritmo analice su perfil profesional para revelar su especialidad idónea.
                   </p>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleStart}
-                    className="group relative px-10 py-4 border border-gold hover:bg-gold/10 transition-all duration-500 overflow-hidden"
+                    className="group relative px-12 py-5 overflow-hidden"
                   >
-                    <span className="relative z-10 text-gold text-lg tracking-[0.2em] font-magic font-medium uppercase py-2">
-                      Someterme al Juicio
-                    </span>
+                    {/* Background & Borders */}
+                    <div className="absolute inset-0 bg-gold/5 backdrop-blur-md border border-gold/30 group-hover:border-gold transition-colors duration-500" />
+                    <div className="absolute inset-[3px] border border-gold/10" />
+                    
+                    {/* Pulsing Outer Glow */}
                     <motion.div 
-                      className="absolute inset-x-0 bottom-0 h-0.5 bg-gold"
-                      initial={{ scaleX: 0 }}
-                      whileHover={{ scaleX: 1 }}
+                      animate={{ 
+                        boxShadow: ["0 0 20px rgba(197,160,89,0.1)", "0 0 40px rgba(197,160,89,0.3)", "0 0 20px rgba(197,160,89,0.1)"] 
+                      }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                      className="absolute inset-0"
                     />
-                  </button>
+
+                    {/* Corner Ornaments */}
+                    <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-gold/50 group-hover:w-5 group-hover:h-5 transition-all duration-300" />
+                    <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-gold/50 group-hover:w-5 group-hover:h-5 transition-all duration-300" />
+                    <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-gold/50 group-hover:w-5 group-hover:h-5 transition-all duration-300" />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-gold/50 group-hover:w-5 group-hover:h-5 transition-all duration-300" />
+
+                    {/* Text and Icons */}
+                    <div className="relative z-10 flex items-center space-x-4">
+                      <Sparkles className="text-gold/40 group-hover:text-gold transition-colors group-hover:scale-125 duration-300" size={18} />
+                      <span className="text-gold text-lg sm:text-xl tracking-[0.3em] font-magic font-bold uppercase drop-shadow-[0_0_8px_rgba(197,160,89,0.5)]">
+                        Someterme al Juicio
+                      </span>
+                      <Sparkles className="text-gold/40 group-hover:text-gold transition-colors group-hover:scale-125 duration-300" size={18} />
+                    </div>
+
+                    {/* Magic Sweep Effect */}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/20 to-transparent -skew-x-12 translate-x-[-150%]"
+                      whileHover={{ x: '150%' }}
+                      transition={{ duration: 0.7, ease: "easeInOut" }}
+                    />
+                  </motion.button>
                 </motion.div>
               )}
 
