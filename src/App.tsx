@@ -195,7 +195,7 @@ export default function App() {
         </AnimatePresence>
 
         {/* Main Stage */}
-        <main className={`w-full ${scene === 'BLOG' ? 'max-w-none' : ['ABOUT', 'SPECIALTIES'].includes(scene) ? 'max-w-6xl mx-auto' : 'max-w-6xl mx-auto'} flex flex-col ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-row lg:items-start lg:gap-12' : 'items-center'} flex-grow space-y-4 md:space-y-6 transition-all duration-700`}>
+        <main className={`w-full ${scene === 'BLOG' ? 'max-w-none' : ['ABOUT', 'SPECIALTIES'].includes(scene) ? 'max-w-6xl mx-auto' : 'max-w-6xl mx-auto'} flex flex-col ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-row lg:items-start lg:gap-12 space-y-4 md:space-y-6' : 'items-center space-y-0'} flex-grow transition-all duration-700`}>
           
           {/* Only show Hat in Home and Desktop Quiz/Result scenes */}
           {['HOME', 'RESULT', 'THINK', 'QUIZ'].includes(scene) && (
@@ -203,9 +203,9 @@ export default function App() {
               <SortingHat thinking={isThinking} />
               
               {/* Thought Bubble - Redesigned: Spectral Glass Aesthetic */}
-              <div className={`w-full relative ${showThought ? 'min-h-[140px]' : 'min-h-0'} flex justify-center perspective-[1000px] transition-all duration-500`}>
-                <AnimatePresence mode='wait'>
-                  {showThought && (
+              <AnimatePresence mode='wait'>
+                {showThought && (
+                  <div className="w-full relative min-h-[140px] flex justify-center perspective-[1000px] mb-6">
                     <motion.div
                       key={hatThought}
                       initial={{ opacity: 0, scale: 0.9, rotateX: -10, y: 20 }}
@@ -238,9 +238,9 @@ export default function App() {
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/5 to-transparent skew-x-12"
                       />
                     </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                  </div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -253,7 +253,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex flex-col items-center text-center space-y-6 py-4"
+                  className="flex flex-col items-center text-center space-y-4 -mt-4 py-0"
                 >
                   <p className="text-xl sm:text-2xl text-parchment/80 max-w-lg font-classic italic leading-relaxed">
                     Aspirante, el sistema de orientación avanzada ha sido activado. 
