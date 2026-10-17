@@ -11,30 +11,7 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 6
   }
 }
 
-export async function getHatThought(
-  answersSoFar: string[], 
-  currentQuestion: string, 
-  currentAnswer: string, 
-  exclude: string[] = []
-): Promise<string> {
-  try {
-    const response = await fetchWithTimeout('/api/gemini/hat-thought', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answersSoFar, currentQuestion, currentAnswer }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      if (data?.thought && typeof data.thought === 'string') {
-        return data.thought;
-      }
-    }
-  } catch (error: any) {
-    console.warn("Using local arcane thought fallback:", error?.message || error);
-  }
-
-  const fallbacks = [
+export const HAT_THOUGHT_FALLBACKS = [
     '"Ese pulso tiembla más que un cirujano con Parkinson arcano... Patético."',
     '"¿Anatomía? Veo que prefieres lo que yo llamo carnicería creativa."',
     '"Huelo una sepsis moral en esa elección. Fascinante y asqueroso a la vez."',
@@ -64,12 +41,45 @@ export async function getHatThought(
     '"Tu destino es tan incierto como un diagnóstico hecho por un estudiante de primer año."',
     '"Siento un vacío en tu intelecto que ni el éter más puro podría llenar."',
     '"Vaya, una respuesta que destila un aroma a "no tengo ni idea". Sincero, al menos."',
-    '"¿Sangre? La sangre es solo el lubricante del destino. Tú pareces preferir el óxido."'
+    '"¿Sangre? La sangre es solo el lubricante del destino. Tú pareces preferir el óxido."',
+    '"Doce preguntas y todavía crees que elegir especialidad es como elegir varita... Qué adorable."',
+    '"Tu perfil dice más de ti que tu expediente académico. Y eso ya es decir."',
+    '"Veo un patrón... y no precisamente uno de excelencia."',
+    '"Sigue respondiendo. Estoy empezando a divertirme con tu incertidumbre."',
+    '"Esa mezcla de intereses es tan coherente como un diagnóstico firmado por un becario."',
+    '"La vocación no se elige con un test. Pero tú sigue intentándolo, mortal."'
   ];
-  
-  const available = fallbacks.filter(f => !exclude.includes(f));
-  const pool = available.length > 0 ? available : fallbacks;
+
+export function getLocalHatThought(exclude: string[] = []): string {
+  const available = HAT_THOUGHT_FALLBACKS.filter((thought) => !exclude.includes(thought));
+  const pool = available.length > 0 ? available : HAT_THOUGHT_FALLBACKS;
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+export async function getHatThought(
+  answersSoFar: string[],
+  currentQuestion: string,
+  currentAnswer: string,
+  exclude: string[] = []
+): Promise<string> {
+  try {
+    const response = await fetchWithTimeout('/api/gemini/hat-thought', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answersSoFar, currentQuestion, currentAnswer }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.thought && typeof data.thought === 'string') {
+        return data.thought;
+      }
+    }
+  } catch (error: any) {
+    console.warn("Using local arcane thought fallback:", error?.message || error);
+  }
+
+  return getLocalHatThought(exclude);
 }
 
 export async function getFinalJudgment(

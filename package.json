@@ -8,7 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "verify:scoring": "tsx scripts/verify-scoring.ts",
+    "verify:extensive": "tsx scripts/verify-extensive.ts",
+    "audit:questions": "tsx scripts/audit-questions.ts",
+    "verify:catalog": "tsx scripts/verify-catalog.ts",
+    "export:questions": "tsx scripts/export-question-bank.ts",
+    "export:catalog": "tsx scripts/export-catalog.ts",
+    "analyze:pilot": "tsx scripts/analyze-pilot.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

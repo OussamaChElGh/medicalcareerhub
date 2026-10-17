@@ -1,0 +1,372 @@
+import { QuestionSet, QuickQuestion } from '../types';
+
+const QUESTIONS: QuickQuestion[] = [
+  {
+    id: 'q1_style',
+    order: 1,
+    kind: 'forced',
+    prompt: 'Ante un caso clínico nuevo, ¿qué parte del trabajo te atrae más?',
+    help: 'No hay una respuesta mejor que otra: buscamos tu forma de trabajar.',
+    options: [
+      {
+        id: 'q1_a',
+        text: 'Integrar síntomas, antecedentes y pruebas para encontrar la causa.',
+        scores: { A1: 4, A2: 1, A3: 2, A4: 2, A5: 3, A8: 3 },
+      },
+      {
+        id: 'q1_b',
+        text: 'Decidir y ejecutar la intervención que resuelve el problema.',
+        scores: { A1: 1, A2: 4, A3: 3, A4: 1, A5: 2, A8: 1 },
+      },
+      {
+        id: 'q1_c',
+        text: 'Acompañar la evolución y ajustar el tratamiento con el tiempo.',
+        scores: { A1: 2, A2: 1, A3: 2, A4: 4, A5: 4, A8: 2 },
+      },
+      {
+        id: 'q1_d',
+        text: 'Interpretar pruebas o datos especializados para dar una respuesta precisa.',
+        scores: { A1: 4, A2: 1, A3: 1, A4: 1, A5: 1, A8: 4 },
+      },
+    ],
+  },
+  {
+    id: 'q2_rhythm',
+    order: 2,
+    kind: 'forced',
+    prompt: '¿Qué ritmo de trabajo te atrae más?',
+    options: [
+      {
+        id: 'q2_a',
+        text: 'Urgencias: cada día cambia y hay que decidir rápido.',
+        scores: { A1: 2, A2: 2, A3: 4, A4: 1, A5: 2, A8: 2 },
+      },
+      {
+        id: 'q2_b',
+        text: 'Actividad programada: agenda y tiempos previsibles.',
+        scores: { A1: 3, A2: 3, A3: 0, A4: 2, A5: 2, A8: 2 },
+      },
+      {
+        id: 'q2_c',
+        text: 'Mixto: alternar urgencias con actividad programada.',
+        scores: { A1: 3, A2: 2, A3: 2, A4: 3, A5: 3, A8: 2 },
+      },
+      {
+        id: 'q2_d',
+        text: 'Proyectos largos: analizar, investigar y publicar.',
+        scores: { A1: 4, A2: 1, A3: 0, A4: 1, A5: 1, A8: 4 },
+      },
+    ],
+  },
+  {
+    id: 'q3_procedures',
+    order: 3,
+    kind: 'forced',
+    prompt: '¿Qué peso quieres que tengan los procedimientos en tu trabajo?',
+    options: [
+      {
+        id: 'q3_a',
+        text: 'Central: operar o intervenir la mayor parte del día.',
+        scores: { A1: 1, A2: 4, A3: 3, A4: 1, A5: 2, A8: 0 },
+      },
+      {
+        id: 'q3_b',
+        text: 'Importante, pero combinado con clínica.',
+        scores: { A1: 2, A2: 3, A3: 3, A4: 2, A5: 3, A8: 1 },
+      },
+      {
+        id: 'q3_c',
+        text: 'Ocasional: técnicas puntuales.',
+        scores: { A1: 3, A2: 1, A3: 2, A4: 3, A5: 3, A8: 2 },
+      },
+      {
+        id: 'q3_d',
+        text: 'Ninguno: mi trabajo es diagnóstico o médico.',
+        scores: { A1: 4, A2: 0, A3: 2, A4: 3, A5: 3, A8: 3 },
+      },
+    ],
+  },
+  {
+    id: 'q4_activities',
+    order: 4,
+    kind: 'maxdiff',
+    prompt: 'Elige la actividad que más te atrae y la que menos.',
+    help: 'La que descartes también aporta información: evita el efecto de “todo me gusta”.',
+    options: [
+      {
+        id: 'q4_a',
+        text: 'Resolver un diagnóstico complejo con datos contradictorios.',
+        scores: { A1: 4, A2: 1, A3: 1, A4: 1, A5: 2, A8: 3 },
+      },
+      {
+        id: 'q4_b',
+        text: 'Realizar una técnica manual precisa.',
+        scores: { A1: 1, A2: 4, A3: 2, A4: 1, A5: 1, A8: 1 },
+      },
+      {
+        id: 'q4_c',
+        text: 'Acompañar a un paciente y ajustar su tratamiento.',
+        scores: { A1: 2, A2: 0, A3: 1, A4: 4, A5: 4, A8: 1 },
+      },
+      {
+        id: 'q4_d',
+        text: 'Analizar imágenes, registros o muestras.',
+        scores: { A1: 3, A2: 1, A3: 1, A4: 1, A5: 1, A8: 4 },
+      },
+    ],
+  },
+  {
+    id: 'q5_continuity',
+    order: 5,
+    kind: 'forced',
+    prompt: '¿Qué tipo de relación con los pacientes te resultaría más satisfactoria?',
+    options: [
+      {
+        id: 'q5_a',
+        text: 'Conocerlos durante años y acompañar su evolución.',
+        scores: { A4: 4 },
+      },
+      {
+        id: 'q5_b',
+        text: 'Resolver episodios concretos y facilitar la continuidad con otros profesionales.',
+        scores: { A4: 1 },
+      },
+      {
+        id: 'q5_c',
+        text: 'Contactos breves y frecuentes, centrados en el problema.',
+        scores: { A4: 2 },
+      },
+      {
+        id: 'q5_d',
+        text: 'Trabajo técnico con contacto puntual.',
+        scores: { A4: 0 },
+      },
+    ],
+  },
+  {
+    id: 'q6_contact',
+    order: 6,
+    kind: 'forced',
+    prompt: '¿Qué intensidad de contacto clínico prefieres?',
+    options: [
+      {
+        id: 'q6_a',
+        text: 'Relación directa intensa: hablar, explorar y acompañar.',
+        scores: { A5: 4 },
+      },
+      {
+        id: 'q6_b',
+        text: 'Contacto frecuente pero breve.',
+        scores: { A5: 3 },
+      },
+      {
+        id: 'q6_c',
+        text: 'Contacto puntual, centrado en pruebas o procedimientos.',
+        scores: { A5: 1 },
+      },
+      {
+        id: 'q6_d',
+        text: 'Casi sin contacto: laboratorio, imagen o análisis.',
+        scores: { A5: 0 },
+      },
+    ],
+  },
+  {
+    id: 'q7_reasoning',
+    order: 7,
+    kind: 'forced',
+    prompt: '¿Qué tipo de razonamiento disfrutas más?',
+    options: [
+      {
+        id: 'q7_a',
+        text: 'Integrar varios sistemas y explicar cómo se relacionan.',
+        scores: { A1: 4, A8: 3 },
+      },
+      {
+        id: 'q7_b',
+        text: 'Comprender la anatomía y resolver problemas estructurales.',
+        scores: { A1: 2, A2: 3, A8: 0 },
+      },
+      {
+        id: 'q7_c',
+        text: 'Interpretar imágenes, registros o muestras.',
+        scores: { A1: 3, A8: 4 },
+      },
+      {
+        id: 'q7_d',
+        text: 'Entender mecanismos fisiológicos, celulares o moleculares.',
+        scores: { A1: 4, A8: 4 },
+      },
+    ],
+  },
+  {
+    id: 'q8_environment',
+    order: 8,
+    kind: 'multi',
+    matchDimension: 'A9',
+    maxSelections: 2,
+    prompt: '¿En qué entornos te gustaría pasar tiempo?',
+    help: 'Puedes elegir hasta dos.',
+    options: [
+      { id: 'q8_emergency', text: 'Urgencias / UCI', matchValue: 'emergency' },
+      { id: 'q8_or', text: 'Quirófano / salas de procedimientos', matchValue: 'or' },
+      { id: 'q8_ward', text: 'Planta de hospitalización', matchValue: 'ward' },
+      { id: 'q8_consultation', text: 'Consulta / ambulatorio', matchValue: 'consultation' },
+      { id: 'q8_lab', text: 'Laboratorio', matchValue: 'lab' },
+      { id: 'q8_imaging', text: 'Imagen', matchValue: 'imaging' },
+      { id: 'q8_home', text: 'Domicilio', matchValue: 'home' },
+    ],
+  },
+  {
+    id: 'q9_population',
+    order: 9,
+    kind: 'multi',
+    matchDimension: 'A6',
+    maxSelections: 2,
+    prompt: '¿Con qué pacientes te gustaría trabajar?',
+    help: 'Puedes elegir hasta dos.',
+    options: [
+      { id: 'q9_neonatal', text: 'Recién nacidos', matchValue: 'neonatal' },
+      { id: 'q9_pediatric', text: 'Niños y adolescentes', matchValue: 'pediatric' },
+      { id: 'q9_adult', text: 'Adultos', matchValue: 'adult' },
+      { id: 'q9_elderly', text: 'Personas mayores', matchValue: 'elderly' },
+      { id: 'q9_pregnancy', text: 'Embarazo y salud de la mujer', matchValue: 'pregnancy' },
+      { id: 'q9_all', text: 'Todas las edades', matchValue: 'all' },
+    ],
+  },
+  {
+    id: 'q10_outcome',
+    order: 10,
+    kind: 'multi',
+    matchDimension: 'A7',
+    maxSelections: 2,
+    prompt: '¿Qué resultado te gustaría producir?',
+    help: 'Elige los dos que más te importen.',
+    options: [
+      { id: 'q10_cure', text: 'Curar o resolver un episodio', matchValue: 'cure' },
+      { id: 'q10_chronic', text: 'Controlar una enfermedad crónica', matchValue: 'chronic' },
+      { id: 'q10_function', text: 'Restaurar función y calidad de vida', matchValue: 'function' },
+      { id: 'q10_palliative', text: 'Aliviar sufrimiento y acompañar el final', matchValue: 'palliative' },
+      { id: 'q10_prevention', text: 'Prevenir enfermedades', matchValue: 'prevention' },
+      { id: 'q10_diagnosis', text: 'Dar un diagnóstico preciso', matchValue: 'diagnosis' },
+      { id: 'q10_knowledge', text: 'Generar conocimiento', matchValue: 'knowledge' },
+      { id: 'q10_stabilize', text: 'Estabilizar una situación crítica', matchValue: 'stabilize' },
+    ],
+  },
+  {
+    id: 'q11_conditions',
+    order: 11,
+    kind: 'ratingGroup',
+    prompt: 'Valora la importancia de estas condiciones al elegir especialidad.',
+    help: '1 = nada importante · 5 = extremadamente importante.',
+    statements: [
+      { id: 'guards', text: 'Aceptar guardias y trabajo nocturno.', dimension: 'C2' },
+      { id: 'predictability', text: 'Tener un horario predecible.', dimension: 'C2' },
+      {
+        id: 'flexibility',
+        text: 'Poder combinar práctica pública, privada o docencia.',
+        dimension: 'C2',
+      },
+      {
+        id: 'research',
+        text: 'Disponer de tiempo para investigación y docencia.',
+        dimension: 'C2',
+      },
+    ],
+  },
+  {
+    id: 'q12_emotional',
+    order: 12,
+    kind: 'ratingGroup',
+    allowUnknown: true,
+    prompt: '¿Cuánto te atrae trabajar en estas situaciones?',
+    help: 'Si no las has vivido, puedes marcar “No lo sé”; no penaliza.',
+    statements: [
+      {
+        id: 'uncertainty',
+        text: 'Tomar decisiones con información incompleta.',
+        dimension: 'C1',
+      },
+      {
+        id: 'suffering',
+        text: 'Acompañar a pacientes y familias en enfermedades graves o incurables.',
+        dimension: 'C1',
+      },
+      {
+        id: 'pressure',
+        text: 'Mantener la concentración bajo presión temporal.',
+        dimension: 'C1',
+      },
+      {
+        id: 'death',
+        text: 'Hablar sobre el final de la vida y la muerte.',
+        dimension: 'C1',
+      },
+    ],
+  },
+  {
+    id: 'q13_systems',
+    order: 13,
+    kind: 'multi',
+    matchDimension: 'A10',
+    maxSelections: 2,
+    prompt: '¿Qué sistemas o áreas te gustaría estudiar con más profundidad?',
+    help: 'Puedes elegir hasta dos. No es una pregunta de conocimiento: buscamos tu interés de contenido.',
+    options: [
+      { id: 'q13_cardiovascular', text: 'Cardiovascular', matchValue: 'cardiovascular' },
+      { id: 'q13_respiratory', text: 'Respiratorio', matchValue: 'respiratory' },
+      { id: 'q13_digestive', text: 'Digestivo', matchValue: 'digestive' },
+      { id: 'q13_renal', text: 'Renal / urinario', matchValue: 'renal' },
+      { id: 'q13_hematologic', text: 'Hematológico', matchValue: 'hematologic' },
+      { id: 'q13_immune', text: 'Inmunitario', matchValue: 'immune' },
+      { id: 'q13_nervous', text: 'Nervioso', matchValue: 'nervous' },
+      { id: 'q13_musculoskeletal', text: 'Musculoesquelético', matchValue: 'musculoskeletal' },
+      { id: 'q13_endocrine', text: 'Endocrino / metabólico', matchValue: 'endocrine' },
+      { id: 'q13_skin', text: 'Piel', matchValue: 'skin' },
+      { id: 'q13_sensory', text: 'Órganos de los sentidos', matchValue: 'sensory' },
+      { id: 'q13_reproductive', text: 'Reproductivo', matchValue: 'reproductive' },
+      { id: 'q13_mental', text: 'Salud mental', matchValue: 'mental' },
+      { id: 'q13_multisystem', text: 'Varios sistemas / transversal', matchValue: 'multisystem' },
+    ],
+  },
+  {
+    id: 'q14_diagnostics',
+    order: 14,
+    kind: 'forced',
+    matchDimension: 'A10',
+    prompt: '¿Con qué tipo de prueba o tecnología te gustaría trabajar más?',
+    help: 'Piensa en la actividad diaria, no en la especialidad que crees que deberías elegir.',
+    options: [
+      {
+        id: 'q14_a',
+        text: 'Imagen cardiaca, ECG y hemodinámica.',
+        matchValue: 'cardiovascular',
+        scores: { A8: 3, A2: 3, A3: 3 },
+      },
+      {
+        id: 'q14_b',
+        text: 'Laboratorio hematológico, coagulación y médula ósea.',
+        matchValue: 'hematologic',
+        scores: { A8: 4, A2: 3, A1: 4 },
+      },
+      {
+        id: 'q14_c',
+        text: 'Análisis de orina, función renal y diálisis.',
+        matchValue: 'renal',
+        scores: { A8: 3, A2: 3, A1: 3 },
+      },
+      {
+        id: 'q14_d',
+        text: 'Imagen radiológica, endoscopia o microbiología.',
+        matchValue: 'multisystem',
+        scores: { A8: 3, A2: 2, A3: 2 },
+      },
+    ],
+  },
+];
+
+export const QUICK_QUESTION_SET: QuestionSet = {
+  id: 'quick-14',
+  version: '2.0.0',
+  questions: QUESTIONS,
+};

@@ -436,7 +436,7 @@ export default function App() {
                       <BookOpen className="text-gold" size={32} />
                       <div>
                         <h2 className="text-2xl sm:text-3xl font-display font-bold italic tracking-wide magic-shadow text-parchment">Catálogo de Especialidades</h2>
-                        <p className="text-xs text-gold-dim">46 Especialidades Médicas • 60 Preguntas Extensivas • 12 Preguntas Rápidas</p>
+                        <p className="text-xs text-gold-dim">{Object.keys(SPECIALTIES_MAP).length} Especialidades Médicas • 60 Preguntas Extensivas • 12 Preguntas Rápidas</p>
                       </div>
                     </div>
                     <button
@@ -521,6 +521,13 @@ export default function App() {
                       </p>
                     </button>
                   </div>
+
+                  <a
+                    href="?v2=1"
+                    className="inline-flex items-center justify-center gap-2 border border-medical-teal/30 bg-medical-teal/10 px-5 py-2.5 text-[10px] uppercase tracking-widest text-medical-teal transition-colors hover:bg-medical-teal/20"
+                  >
+                    Probar el nuevo motor v2 (beta)
+                  </a>
 
                   <button
                     onClick={() => setScene('HOME')}
