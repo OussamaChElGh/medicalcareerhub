@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Book, Info, Home, ShieldCheck, Newspaper, Sparkles, Menu, X } from 'lucide-react';
+import { Book, Info, Home, ShieldCheck, Newspaper, Sparkles, Menu, X, BarChart3, MessageCircle } from 'lucide-react';
 
 interface NavbarProps {
-  onNavigate: (scene: 'HOME' | 'ABOUT' | 'SPECIALTIES' | 'QUIZ' | 'BLOG') => void;
+  onNavigate: (scene: any) => void;
   activeScene: string;
 }
 
@@ -14,6 +14,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeScene }) => {
     { id: 'HOME', label: 'Inicio', icon: Home },
     { id: 'SPECIALTIES', label: 'Grimorio', icon: Book },
     { id: 'BLOG', label: 'Crónicas', icon: Newspaper },
+    { id: 'STATS', label: 'Censo', icon: BarChart3 },
+    { id: 'ORACLE', label: 'Oráculo', icon: MessageCircle },
     { id: 'ABOUT', label: 'Origen', icon: Info },
   ];
 

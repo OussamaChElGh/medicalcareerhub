@@ -33,4 +33,4 @@ export interface BlogPost {
 
 export type QuizType = 'QUICK' | 'EXTENSIVE';
 
-export type Scene = 'HOME' | 'SELECTION' | 'PAYMENT' | 'QUIZ' | 'REVEAL' | 'THINK' | 'RESULT' | 'BLOG';
+export type Scene = 'HOME' | 'SELECTION' | 'PAYMENT' | 'QUIZ' | 'REVEAL' | 'THINK' | 'RESULT' | 'BLOG' | 'STATS' | 'ORACLE' | 'ABOUT' | 'SPECIALTIES';

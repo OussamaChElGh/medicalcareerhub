@@ -5,13 +5,17 @@ import { SortingHat } from './components/SortingHat';
 import { TypewriterText } from './components/TypewriterText';
 import { Navbar } from './components/Navbar';
 import { PaymentInterface } from './components/PaymentInterface';
+import { StatsView } from './components/StatsView';
+import { OracleView } from './components/OracleView';
 import { QUICK_QUESTIONS, EXTENSIVE_QUESTIONS, SPECIALTIES_MAP, BLOG_POSTS } from './constants';
 import { Scene, Specialty, Option, QuizType, BlogPost } from './types';
 import { getHatThought, getFinalJudgment } from './lib/gemini';
-import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, Shield, CheckCircle2, Circle, CreditCard, Zap, Crown, Newspaper, Calendar, User, ArrowLeft } from 'lucide-react';
+import { generateMedicalReportPDF } from './lib/pdfReport';
+import { generateDossierPDF } from './lib/dossierPdf';
+import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, Shield, CheckCircle2, Circle, CreditCard, Zap, Crown, Newspaper, Calendar, User, ArrowLeft, FileDown, FileCheck, Check } from 'lucide-react';
 
 export default function App() {
-  const [scene, setScene] = useState<Scene | 'ABOUT' | 'SPECIALTIES' | 'BLOG'>('HOME');
+  const [scene, setScene] = useState<Scene>('HOME');
   const [quizType, setQuizType] = useState<QuizType | null>(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
@@ -22,6 +26,9 @@ export default function App() {
   const [result, setResult] = useState<Specialty | null>(null);
   const [personalizedJudgment, setPersonalizedJudgment] = useState<string>("");
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [candidateName, setCandidateName] = useState<string>("");
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState<boolean>(false);
+  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
 
   const activeQuestions = useMemo(() => {
     return quizType === 'EXTENSIVE' ? EXTENSIVE_QUESTIONS : QUICK_QUESTIONS;
@@ -57,7 +64,34 @@ export default function App() {
     startQuiz('EXTENSIVE');
   };
 
-  const handleNavigate = (newScene: Scene | 'ABOUT' | 'SPECIALTIES' | 'BLOG') => {
+  const handleDownloadReport = () => {
+    if (!result) return;
+    setIsDownloadingPDF(true);
+    try {
+      generateMedicalReportPDF({
+        result,
+        judgment: personalizedJudgment || result.description,
+        quizType,
+        candidateName: candidateName.trim() || "Aspirante MIR / Facultativo",
+      });
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 4500);
+    } catch (error) {
+      console.error("Error generating report PDF:", error);
+    } finally {
+      setIsDownloadingPDF(false);
+    }
+  };
+
+  const handleDownloadDossier = () => {
+    try {
+      generateDossierPDF();
+    } catch (error) {
+      console.error("Error generating dossier PDF:", error);
+    }
+  };
+
+  const handleNavigate = (newScene: Scene) => {
     setSelectedPost(null);
     if (newScene === 'QUIZ' && scene !== 'QUIZ') {
       handleStart();
@@ -165,7 +199,7 @@ export default function App() {
     <AtmosphericFrame>
       <Navbar onNavigate={handleNavigate} activeScene={scene} />
       
-      <div className={`relative w-full flex flex-col ${scene === 'BLOG' ? 'items-stretch' : 'items-center px-4 sm:px-6 md:px-12'} ${['QUIZ', 'THINK'].includes(scene) ? 'pt-16 pb-8 sm:pt-32 sm:pb-8' : 'pt-24 pb-10 sm:pt-40 sm:pb-20'} transition-all duration-500`}>
+      <div className={`relative w-full flex flex-col items-center px-4 sm:px-6 md:px-12 ${['QUIZ', 'THINK'].includes(scene) ? 'pt-16 pb-8 sm:pt-32 sm:pb-8' : 'pt-24 pb-10 sm:pt-40 sm:pb-20'} transition-all duration-500`}>
         
         {/* Header - More flexible positioning */}
         <AnimatePresence>
@@ -195,10 +229,10 @@ export default function App() {
         </AnimatePresence>
 
         {/* Main Stage */}
-        <main className={`w-full ${scene === 'BLOG' ? 'max-w-none' : ['ABOUT', 'SPECIALTIES'].includes(scene) ? 'max-w-6xl mx-auto' : 'max-w-6xl mx-auto'} flex flex-col ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-row lg:items-start lg:gap-12' : 'items-center'} flex-grow space-y-2 md:space-y-4 transition-all duration-700`}>
+        <main className={`w-full ${['ABOUT', 'SPECIALTIES', 'BLOG', 'STATS', 'ORACLE'].includes(scene) ? 'max-w-none' : 'max-w-6xl mx-auto'} flex flex-col ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-row lg:items-start lg:gap-12' : 'items-center'} flex-grow space-y-2 md:space-y-4 transition-all duration-700`}>
           
           {/* Only show Hat in Home and Desktop Quiz/Result scenes */}
-          {['HOME', 'RESULT', 'THINK', 'QUIZ'].includes(scene) && (
+          {['HOME', 'RESULT', 'THINK', 'QUIZ', 'ORACLE'].includes(scene) && (
             <div className={`relative flex flex-col items-center flex-shrink-0 ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'hidden lg:flex lg:sticky lg:top-24 lg:w-[350px]' : 'w-full'}`}>
               <SortingHat thinking={isThinking} />
               
@@ -245,8 +279,56 @@ export default function App() {
           )}
 
           {/* Interactive Area */}
-          <div className={`w-full ${['QUIZ', 'RESULT', 'THINK'].includes(scene) ? 'lg:flex-grow lg:max-w-none' : 'max-w-2xl'}`}>
+          <div className={`w-full flex justify-center ${['QUIZ', 'RESULT', 'THINK', 'BLOG', 'ABOUT', 'SPECIALTIES', 'STATS', 'ORACLE'].includes(scene) ? 'lg:flex-grow lg:max-w-none' : 'max-w-2xl'}`}>
             <AnimatePresence mode="wait">
+              {scene === 'STATS' && (
+                <motion.div
+                  key="stats"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full"
+                >
+                  <StatsView />
+                </motion.div>
+              )}
+
+              {scene === 'ORACLE' && (
+                <motion.div
+                  key="oracle"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full"
+                >
+                  <OracleView />
+                </motion.div>
+              )}
+
+              {scene === 'STATS' && (
+                <motion.div
+                  key="stats"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full"
+                >
+                  <StatsView />
+                </motion.div>
+              )}
+
+              {scene === 'ORACLE' && (
+                <motion.div
+                  key="oracle"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="w-full"
+                >
+                  <OracleView />
+                </motion.div>
+              )}
+
               {scene === 'HOME' && (
                 <motion.div 
                   key="home"
@@ -323,12 +405,21 @@ export default function App() {
                       A través de una serie de dilemas clínicos y situaciones de práctica diaria, el algoritmo analiza cuatro dimensiones clave: Resolución Técnica, Gestión de Crisis, Razonamiento Diagnóstico y Atención Social.
                     </p>
                   </div>
-                  <button 
-                    onClick={() => handleNavigate('HOME')}
-                    className="text-gold uppercase tracking-widest text-xs border-b border-gold/40 pb-1"
-                  >
-                    Regresar al Atrio
-                  </button>
+                  <div className="flex flex-wrap items-center gap-4 pt-2">
+                    <button 
+                      onClick={() => handleNavigate('HOME')}
+                      className="text-gold uppercase tracking-widest text-xs border-b border-gold/40 pb-1 cursor-pointer"
+                    >
+                      Regresar al Atrio
+                    </button>
+                    <button
+                      onClick={handleDownloadDossier}
+                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 hover:border-gold rounded-xl text-xs font-bold tracking-wider uppercase transition-all shadow-sm cursor-pointer ml-auto"
+                    >
+                      <FileDown size={16} />
+                      <span>Descargar Dossier Completo (PDF)</span>
+                    </button>
+                  </div>
                 </motion.div>
               )}
 
@@ -338,11 +429,24 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="glass-surface p-10 space-y-8 max-h-[600px] overflow-y-auto mask-fade custom-scrollbar"
+                  className="glass-surface p-6 sm:p-10 space-y-8 max-h-[650px] overflow-y-auto mask-fade custom-scrollbar"
                 >
-                  <div className="flex items-center space-x-4 border-b border-gold/20 pb-4 sticky top-0 bg-bg-deep/80 backdrop-blur z-10">
-                    <BookOpen className="text-gold" size={32} />
-                    <h2 className="text-3xl font-display font-bold italic tracking-wide magic-shadow text-parchment">Catálogo de Especialidades</h2>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gold/20 pb-4 sticky top-0 bg-academy-navy/95 backdrop-blur-md z-10 gap-4">
+                    <div className="flex items-center space-x-4">
+                      <BookOpen className="text-gold" size={32} />
+                      <div>
+                        <h2 className="text-2xl sm:text-3xl font-display font-bold italic tracking-wide magic-shadow text-parchment">Catálogo de Especialidades</h2>
+                        <p className="text-xs text-gold-dim">46 Especialidades Médicas • 60 Preguntas Extensivas • 12 Preguntas Rápidas</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleDownloadDossier}
+                      className="inline-flex items-center space-x-2 px-4 py-2.5 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 hover:border-gold rounded-xl text-xs font-bold tracking-wider uppercase transition-all shadow-sm cursor-pointer"
+                      title="Descargar Dossier Completo con metodología y banco de preguntas"
+                    >
+                      <FileDown size={16} />
+                      <span>Descargar Dossier (PDF)</span>
+                    </button>
                   </div>
                   
                   <div className="grid grid-cols-1 gap-8">
@@ -664,6 +768,73 @@ export default function App() {
                       </p>
                     </div>
                   </div>
+ 
+                  {/* Official PDF Medical Report Download Card */}
+                  <div className="pt-6 border-t border-gold/20">
+                    <div className="bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-gold/30 rounded-2xl p-6 sm:p-8 space-y-6 text-center max-w-xl mx-auto shadow-[0_15px_35px_rgba(0,0,0,0.4)]">
+                      <div className="space-y-2">
+                        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-medical-teal/10 border border-medical-teal/30 text-medical-teal text-[10px] uppercase font-mono tracking-widest">
+                          <Shield size={12} />
+                          <span>Expediente Clínico Certificado</span>
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-display font-bold text-parchment tracking-wide">
+                          Descargar Informe Médico Oficial
+                        </h3>
+                        <p className="text-xs sm:text-sm text-parchment/65 font-sans italic leading-relaxed">
+                          Emite tu informe formal con cabecera clínica institucional, número de expediente, dictamen del Sombrero y fundamentación psicotécnica en formato PDF para impresión o currículum.
+                        </p>
+                      </div>
+
+                      {/* Optional Candidate Name input */}
+                      <div className="max-w-md mx-auto space-y-1.5 text-left">
+                        <label className="text-[10px] uppercase tracking-wider text-gold-dim font-mono block pl-1">
+                          Nombre del Facultativo o Aspirante (opcional)
+                        </label>
+                        <input
+                          type="text"
+                          value={candidateName}
+                          onChange={(e) => setCandidateName(e.target.value)}
+                          placeholder="Ej: Dr. Alejandro Valdés o Dra. María Navarro"
+                          className="w-full bg-black/40 border border-gold/25 rounded-xl px-4 py-2.5 text-sm text-parchment placeholder-parchment/30 focus:outline-none focus:border-gold transition-colors"
+                        />
+                      </div>
+
+                      {/* Download CTA Button */}
+                      <div className="pt-1 flex flex-col items-center">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleDownloadReport}
+                          disabled={isDownloadingPDF}
+                          className="group relative px-8 py-4 bg-gradient-to-r from-gold via-gold-light to-gold text-academy-navy font-bold rounded-xl overflow-hidden shadow-[0_10px_25px_rgba(197,160,89,0.3)] hover:shadow-[0_15px_35px_rgba(197,160,89,0.5)] transition-all flex items-center space-x-3 cursor-pointer disabled:opacity-50"
+                        >
+                          {downloadSuccess ? (
+                            <>
+                              <FileCheck size={20} className="text-emerald-800" />
+                              <span className="uppercase tracking-widest text-xs font-bold text-emerald-900">
+                                ¡Informe Descargado!
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <FileDown size={20} className="group-hover:-translate-y-0.5 transition-transform" />
+                              <span className="uppercase tracking-widest text-xs font-bold">
+                                {isDownloadingPDF ? 'Generando PDF...' : 'Descargar Informe (PDF)'}
+                              </span>
+                            </>
+                          )}
+                        </motion.button>
+
+                        <div className="flex items-center space-x-3 mt-3 text-[10px] text-parchment/40 font-mono">
+                          <span>A4 Estándar</span>
+                          <span>•</span>
+                          <span>Firma Digital PKI</span>
+                          <span>•</span>
+                          <span>Cabecera Institucional</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                   <button
                     onClick={handleStart}
@@ -680,7 +851,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="glass-surface p-6 sm:p-20 space-y-16 w-screen min-h-screen custom-scrollbar scrollbar-thin overflow-y-auto border-none !rounded-none -mx-4 sm:-mx-6 md:-mx-12"
+                  className="glass-surface p-6 sm:p-12 md:p-20 space-y-16 w-full max-w-6xl min-h-[70vh] mx-auto custom-scrollbar scrollbar-thin overflow-y-auto border border-gold/10 rounded-2xl md:rounded-3xl shadow-[0_30px_100px_rgba(0,0,0,0.8)]"
                 >
                   <AnimatePresence mode="wait">
                     {!selectedPost ? (
@@ -689,7 +860,7 @@ export default function App() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="space-y-10"
+                        className="space-y-10 max-w-5xl mx-auto"
                       >
                         <div className="flex flex-col sm:flex-row items-center justify-between border-b border-gold/20 pb-6 gap-4">
                           <div className="flex items-center space-x-4">
@@ -767,7 +938,7 @@ export default function App() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
-                        className="space-y-8"
+                        className="space-y-8 max-w-4xl mx-auto"
                       >
                         <button 
                           onClick={() => setSelectedPost(null)}

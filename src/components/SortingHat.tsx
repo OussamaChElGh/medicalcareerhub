@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface SortingHatProps {
   thinking?: boolean;
@@ -12,22 +12,59 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
   // Path to the image in the public folder
   const sortingHatSrc = "/magic-sorting-hat.png";
 
+  // Technological data fragments for the telemetry data stream
+  const leftTelemetry = useMemo(() => [
+    'BIO_SIG: ACTIVE',
+    'EEG_α: 11.4 Hz',
+    'NEURO_MAP: 98.4%',
+    'SYNAPSE_FLUX: 420',
+    'VOC_INDEX: 0.962',
+    'AXON_TRACE: OK',
+  ], []);
+
+  const rightTelemetry = useMemo(() => [
+    'SCAN_RATE: 120 FPS',
+    '0x4F8A // MATCH',
+    'CORTEX_RESONANCE',
+    'REF: BIO-CLINIC',
+    'Δ_PRESSURE: 120/80',
+    'ALGO_VERDICT: CALC',
+  ], []);
+
   return (
-    <div className={`relative ${compact ? 'w-24 h-24 xs:w-32 xs:h-32 sm:w-36 sm:h-36' : 'w-56 h-56 sm:w-72 sm:h-72'} md:w-96 md:h-96 flex items-center justify-center transition-all duration-700`}>
+    <div className={`relative ${compact ? 'w-24 h-24 xs:w-32 xs:h-32 sm:w-36 sm:h-36' : 'w-56 h-56 sm:w-72 sm:h-72'} md:w-96 md:h-96 flex items-center justify-center transition-all duration-700 select-none`}>
       {/* Background Glow - Medical Magic */}
       <motion.div
         animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.2, 0.1],
+          scale: thinking ? [1.1, 1.35, 1.1] : [1, 1.2, 1],
+          opacity: thinking ? [0.25, 0.45, 0.25] : [0.1, 0.2, 0.1],
         }}
         transition={{
-          duration: 4,
+          duration: thinking ? 2 : 4,
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute w-2/3 h-2/3 bg-medical-teal rounded-full blur-[80px]"
+        className={`absolute w-2/3 h-2/3 ${thinking ? 'bg-medical-teal' : 'bg-medical-teal'} rounded-full blur-[80px] pointer-events-none`}
       />
 
+      {/* Secondary Tech Pulse during Thinking */}
+      <AnimatePresence>
+        {thinking && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ 
+              opacity: [0.1, 0.3, 0.1],
+              scale: [0.9, 1.4, 0.9],
+              rotate: [0, 180, 360]
+            }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            className="absolute w-3/4 h-3/4 rounded-full border border-medical-teal/20 pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Main Hat Body Container */}
       <motion.div
         animate={thinking ? {
           rotate: [-1.5, 1.5, -1.5],
@@ -61,19 +98,218 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
           </svg>
         )}
         
-        {/* Magic Intelligence Glow - Bio-Teal */}
+        {/* Magic Intelligence Glow - Bio-Teal Eyes */}
         <motion.div
           animate={{
             opacity: thinking ? [0.6, 1, 0.6] : [0.2, 0.4, 0.2],
-            scale: thinking ? [1, 1.2, 1] : [1, 1, 1],
+            scale: thinking ? [1, 1.25, 1] : [1, 1, 1],
           }}
-          transition={{ duration: 2, repeat: Infinity }}
+          transition={{ duration: thinking ? 0.8 : 2, repeat: Infinity }}
           className="absolute top-[48%] w-full h-6 flex justify-center space-x-16 pointer-events-none"
         >
           <div className="w-2.5 h-2.5 bg-medical-teal rounded-full blur-[4px] shadow-[0_0_15px_#14b8a6]" />
           <div className="w-2.5 h-2.5 bg-medical-teal rounded-full blur-[4px] shadow-[0_0_15px_#14b8a6]" />
         </motion.div>
+
+        {/* ======================================================== */}
+        {/* TECHNOLOGICAL SCANNING OVERLAYS (Active in thinking state) */}
+        {/* ======================================================== */}
+        <AnimatePresence>
+          {thinking && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl"
+            >
+              {/* Subtle Horizontal Scanlines Grid */}
+              <div 
+                className="absolute inset-0 opacity-[0.12] mix-blend-screen"
+                style={{
+                  backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(20, 184, 166, 0.35) 3px, rgba(20, 184, 166, 0.35) 4px)'
+                }}
+              />
+
+              {/* Holographic Laser Scanner Beam (Sweeping vertically up and down) */}
+              <motion.div
+                animate={{
+                  y: ['-10%', '110%', '-10%']
+                }}
+                transition={{
+                  duration: 2.8,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="absolute inset-x-0 h-16 pointer-events-none z-30"
+              >
+                {/* Laser beam trailing gradient */}
+                <div className="w-full h-full bg-gradient-to-b from-transparent via-medical-teal/15 to-transparent" />
+                {/* Laser bright core line */}
+                <div className="w-full h-[1.5px] bg-gradient-to-r from-transparent via-medical-teal to-transparent shadow-[0_0_10px_#14b8a6,0_0_20px_#14b8a6]" />
+                
+                {/* Micro tracker nodes on scanner line */}
+                <div className="absolute top-0 left-1/4 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-medical-teal shadow-[0_0_6px_#14b8a6]" />
+                <div className="absolute top-0 right-1/4 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-gold shadow-[0_0_6px_#c5a059]" />
+              </motion.div>
+
+              {/* Secondary Fast Inverse Beam for depth */}
+              <motion.div
+                animate={{
+                  y: ['110%', '-10%', '110%']
+                }}
+                transition={{
+                  duration: 4.2,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+                className="absolute inset-x-0 h-6 pointer-events-none opacity-40 z-20"
+              >
+                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent shadow-[0_0_8px_#c5a059]" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
+
+      {/* ======================================================== */}
+      {/* HUD RETICLE & DATA STREAM LAYERS (Thinking State)         */}
+      {/* ======================================================== */}
+      <AnimatePresence>
+        {thinking && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center overflow-visible"
+          >
+            {/* HUD Corner Brackets Framing the Hat */}
+            <div className="absolute -inset-2 sm:-inset-4">
+              {/* Top-Left Bracket */}
+              <div className="absolute top-0 left-0 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-l-2 border-medical-teal/70 rounded-tl-sm shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
+              {/* Top-Right Bracket */}
+              <div className="absolute top-0 right-0 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-r-2 border-medical-teal/70 rounded-tr-sm shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
+              {/* Bottom-Left Bracket */}
+              <div className="absolute bottom-0 left-0 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-l-2 border-medical-teal/70 rounded-bl-sm shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
+              {/* Bottom-Right Bracket */}
+              <div className="absolute bottom-0 right-0 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-r-2 border-medical-teal/70 rounded-br-sm shadow-[0_0_8px_rgba(20,184,166,0.5)]" />
+            </div>
+
+            {/* Concentric Rotating Tech Rings */}
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+              className="absolute w-[104%] h-[104%] rounded-full border border-dashed border-medical-teal/20"
+            />
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+              className="absolute w-[86%] h-[86%] rounded-full border border-dotted border-gold/25"
+            />
+
+            {/* Left Data Stream (Telemetry readouts) */}
+            {!compact && (
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="hidden sm:flex absolute -left-16 md:-left-20 flex-col space-y-1.5 font-mono text-[9px] md:text-[10px] tracking-wider text-medical-teal/75 select-none"
+              >
+                {leftTelemetry.map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    animate={{
+                      opacity: [0.35, 0.9, 0.35],
+                      x: [0, (idx % 2 === 0 ? 2 : -1), 0]
+                    }}
+                    transition={{
+                      duration: 2 + (idx * 0.4),
+                      repeat: Infinity,
+                      delay: idx * 0.18
+                    }}
+                    className="flex items-center space-x-1.5 backdrop-blur-[2px] bg-black/20 px-1 py-0.5 rounded border-l border-medical-teal/30"
+                  >
+                    <span className="w-1 h-1 bg-medical-teal rounded-full animate-ping" />
+                    <span>{item}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+
+            {/* Right Data Stream (Algorithmic / Diagnostics) */}
+            {!compact && (
+              <motion.div 
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="hidden sm:flex absolute -right-16 md:-right-20 flex-col items-end space-y-1.5 font-mono text-[9px] md:text-[10px] tracking-wider text-gold/80 select-none"
+              >
+                {rightTelemetry.map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    animate={{
+                      opacity: [0.4, 0.95, 0.4],
+                      x: [0, (idx % 2 === 0 ? -2 : 1), 0]
+                    }}
+                    transition={{
+                      duration: 2.2 + (idx * 0.35),
+                      repeat: Infinity,
+                      delay: idx * 0.22
+                    }}
+                    className="flex items-center space-x-1.5 backdrop-blur-[2px] bg-black/20 px-1 py-0.5 rounded border-r border-gold/30"
+                  >
+                    <span>{item}</span>
+                    <span className="w-1 h-1 bg-gold rounded-full" />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+
+            {/* ECG Pulse Waveform Trace at the Bottom of Hat */}
+            <div className="absolute -bottom-3 sm:-bottom-5 w-44 sm:w-60 h-6 flex items-center justify-center overflow-hidden">
+              <svg viewBox="0 0 200 30" fill="none" className="w-full h-full opacity-60">
+                <motion.path
+                  d="M0 15 H60 L70 5 L80 25 L90 8 L100 20 L105 15 H200"
+                  stroke="#14b8a6"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ 
+                    pathLength: [0, 1, 1],
+                    pathOffset: [0, 0, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  style={{ filter: 'drop-shadow(0 0 4px #14b8a6)' }}
+                />
+              </svg>
+            </div>
+
+            {/* Technological Status Badge */}
+            <motion.div
+              initial={{ y: 5, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 5, opacity: 0 }}
+              className="absolute -top-6 sm:-top-8 flex items-center space-x-2 px-3 py-0.5 rounded-full bg-black/60 border border-medical-teal/40 backdrop-blur-md shadow-[0_0_12px_rgba(20,184,166,0.3)]"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-medical-teal opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-medical-teal" />
+              </span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-medical-teal font-semibold tracking-widest uppercase">
+                BIO-NEURAL SCANNING
+              </span>
+              <span className="text-[9px] text-gold/60 font-mono">v4.2</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Cinematic Stethoscope Surround - Precise SVG Implementation */}
       <motion.div
@@ -115,3 +351,4 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
     </div>
   );
 };
+

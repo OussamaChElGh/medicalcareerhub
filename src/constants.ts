@@ -1238,3 +1238,29 @@ export const SPECIALTIES_MAP: Record<string, Specialty> = {
     hogwartsHouse: "Gryffindor"
   }
 };
+export const ACADEMY_STATS = [
+  { name: 'Gryffindor', value: 25, color: '#991b1b', label: 'Urgencias & Intensivos' },
+  { name: 'Slytherin', value: 18, color: '#064e3b', label: 'Cirugía & Estética' },
+  { name: 'Ravenclaw', value: 35, color: '#1e3a8a', label: 'Investigación & Interna' },
+  { name: 'Hufflepuff', value: 22, color: '#854d0e', label: 'Familiar & Paliativos' },
+];
+
+export const SPECIALTY_TRENDS = [
+  { month: 'Ene', Gryffindor: 120, Slytherin: 90, Ravenclaw: 150, Hufflepuff: 100 },
+  { month: 'Feb', Gryffindor: 140, Slytherin: 110, Ravenclaw: 180, Hufflepuff: 130 },
+  { month: 'Mar', Gryffindor: 130, Slytherin: 150, Ravenclaw: 160, Hufflepuff: 110 },
+  { month: 'Abr', Gryffindor: 170, Slytherin: 140, Ravenclaw: 200, Hufflepuff: 160 },
+  { month: 'May', Gryffindor: 190, Slytherin: 180, Ravenclaw: 220, Hufflepuff: 180 },
+];
+
+export const ORACLE_QUOTES = [
+  "No busques el diagnóstico en los libros, a veces el paciente solo necesita que lo escuches... o que lo envíes a casa con un placebo mágico.",
+  "La diferencia entre un buen cirujano y uno excelente es el tiempo que tarda en ocultar sus errores... digo, en repararlos.",
+  "Tu residencia será como el Bosque Prohibido: llena de monstruos, sin sueño y con alguien gritándote que no deberías estar ahí.",
+  "En Interna el diagnóstico es el viaje, no el destino. El destino suele ser más pruebas.",
+  "Si la guardia está tranquila, NO LO DIGAS. El universo compensará tu arrogancia con tres paradas y una gotera.",
+  "Un estetoscopio es una excelente herramienta para parecer ocupado cuando no tienes ni idea de qué está pasando.",
+  "La pediatría es fácil: si el niño llora, estás haciendo tu trabajo. Si deja de llorar, empieza a preocuparte.",
+  "Psiquiatría: donde el 'por qué' es más importante que el 'qué', y donde el café es el único tratamiento con evidencia sólida."
+];
+
