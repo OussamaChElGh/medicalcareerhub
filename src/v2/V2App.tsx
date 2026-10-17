@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, BookOpen, Download, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { AtmosphericFrame } from '../components/AtmosphericFrame';
+import { OracleView } from '../components/OracleView';
 import { SortingHat } from '../components/SortingHat';
+import { StatsView } from '../components/StatsView';
 import { QUICK_QUESTION_SET } from '../data/questions.quick';
 import {
   buildScoringQuestionSet,
@@ -11,6 +13,16 @@ import {
 } from '../lib/branching';
 import { getFinalJudgment } from '../lib/gemini';
 import {
+  downloadBlob,
+  downloadPremiumPdf,
+  loadPremiumAccess,
+  PremiumAccess,
+  PremiumMode,
+  savePremiumAccess,
+  startPremiumCheckout,
+  verifyPremiumSession,
+} from '../lib/premium';
+import {
   clearPilotSessions,
   createPilotSession,
   downloadPilotSessions,
@@ -18,12 +30,33 @@ import {
   savePilotSession,
 } from '../lib/pilot';
 import { scoreQuickQuiz } from '../lib/scoring';
+import {
+  clearV2Session,
+  createEmptySession,
+  loadV2Session,
+  saveV2Session,
+  V2PersistedSession,
+} from '../lib/v2Session';
 import { AnswerRecord, QuestionSet, QuickQuestion, QuizResult } from '../types';
+import { V2About } from './V2About';
+import { V2Blog } from './V2Blog';
 import { V2Catalog } from './V2Catalog';
+import { V2Navbar, V2NavScene } from './V2Navbar';
+import { V2PremiumModal } from './V2PremiumModal';
 import { V2Quiz } from './V2Quiz';
 import { V2Result } from './V2Result';
 
-type Stage = 'intro' | 'quiz' | 'result' | 'extensive' | 'catalog';
+type Stage =
+  | 'intro'
+  | 'quiz'
+  | 'result'
+  | 'extensive'
+  | 'catalog'
+  | 'blog'
+  | 'about'
+  | 'stats'
+  | 'oracle';
+
 type ResultMode = 'free' | 'extensive';
 
 interface ExtensiveConfig {
@@ -31,8 +64,38 @@ interface ExtensiveConfig {
   scoringQuestionSet: QuestionSet;
   initialAnswers: AnswerRecord[];
   initialAnswerTexts: Record<string, string>;
+  initialIndex: number;
   answeredOffset: number;
 }
+
+interface FreeInitial {
+  answers: AnswerRecord[];
+  texts: Record<string, string>;
+  index: number;
+}
+
+interface PremiumConfig {
+  configured: boolean;
+  priceCents: number;
+  currency: string;
+  productName: string;
+  devUnlock: boolean;
+}
+
+function createReportId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `report-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+const DEFAULT_PREMIUM_CONFIG: PremiumConfig = {
+  configured: false,
+  priceCents: 499,
+  currency: 'eur',
+  productName: 'Informe vocacional Arcanum Medicum',
+  devUnlock: false,
+};
 
 const SAMPLE_ANSWERS: AnswerRecord[] = [
   { questionId: 'q1_style', optionId: 'q1_b' },
@@ -57,22 +120,46 @@ const SAMPLE_ANSWERS: AnswerRecord[] = [
   { questionId: 'q14_diagnostics', optionId: 'q14_d' },
 ];
 
+const STAGE_PARAMS: Record<string, Stage> = {
+  quiz: 'quiz',
+  catalog: 'catalog',
+  blog: 'blog',
+  about: 'about',
+  stats: 'stats',
+  oracle: 'oracle',
+};
+
+function isV2NavScene(stage: Stage): stage is V2NavScene {
+  return [
+    'intro',
+    'catalog',
+    'blog',
+    'stats',
+    'oracle',
+    'about',
+    'result',
+  ].includes(stage);
+}
+
 export function V2App() {
   const params = new URLSearchParams(window.location.search);
   const isResultDemo = params.get('demo') === 'result';
   const isExtensiveDemo = params.get('demo') === 'extensive';
   const isDemo = isResultDemo || isExtensiveDemo;
-  const stageParam = params.get('stage');
+  const stageParam = params.get('stage') ?? '';
+  const demoResult = isDemo ? scoreQuickQuiz(SAMPLE_ANSWERS) : null;
+
+  const [savedSession] = useState<V2PersistedSession | null>(() =>
+    isDemo || stageParam ? null : loadV2Session(),
+  );
+
   const initialStage: Stage = isResultDemo
     ? 'result'
     : isExtensiveDemo
       ? 'extensive'
-      : stageParam === 'quiz'
-        ? 'quiz'
-        : stageParam === 'catalog'
-          ? 'catalog'
-          : 'intro';
-  const demoResult = isDemo ? scoreQuickQuiz(SAMPLE_ANSWERS) : null;
+      : STAGE_PARAMS[stageParam] ??
+        (savedSession?.stage === 'result' && savedSession.result ? 'result' : 'intro');
+
   const demoBranch = isExtensiveDemo && demoResult ? selectBranchQuestions(demoResult) : null;
   const demoExtensiveConfig: ExtensiveConfig | null = demoBranch
     ? {
@@ -80,16 +167,38 @@ export function V2App() {
         scoringQuestionSet: buildScoringQuestionSet(QUICK_QUESTION_SET, demoBranch),
         initialAnswers: SAMPLE_ANSWERS,
         initialAnswerTexts: {},
+        initialIndex: 0,
         answeredOffset: QUICK_QUESTION_SET.questions.length,
       }
     : null;
 
   const [stage, setStage] = useState<Stage>(initialStage);
-  const [result, setResult] = useState<QuizResult | null>(demoResult);
-  const [resultMode, setResultMode] = useState<ResultMode>('free');
-  const [freeResult, setFreeResult] = useState<QuizResult | null>(demoResult);
-  const [freeAnswers, setFreeAnswers] = useState<AnswerRecord[]>(isDemo ? SAMPLE_ANSWERS : []);
-  const [freeAnswerTexts, setFreeAnswerTexts] = useState<Record<string, string>>({});
+  const [result, setResult] = useState<QuizResult | null>(
+    isResultDemo || (savedSession?.stage === 'result' && savedSession.result)
+      ? demoResult ?? savedSession?.result ?? null
+      : null,
+  );
+  const [resultMode, setResultMode] = useState<ResultMode>(
+    savedSession?.stage === 'result' ? savedSession.resultMode : 'free',
+  );
+  const [freeResult, setFreeResult] = useState<QuizResult | null>(
+    demoResult ?? savedSession?.freeResult ?? null,
+  );
+  const [freeAnswers, setFreeAnswers] = useState<AnswerRecord[]>(
+    isDemo ? SAMPLE_ANSWERS : savedSession?.freeAnswers ?? [],
+  );
+  const [freeAnswerTexts, setFreeAnswerTexts] = useState<Record<string, string>>(
+    savedSession?.freeAnswerTexts ?? {},
+  );
+  const [freeInitial, setFreeInitial] = useState<FreeInitial | null>(
+    savedSession?.stage === 'quiz'
+      ? {
+          answers: savedSession.freeAnswers,
+          texts: savedSession.freeAnswerTexts,
+          index: savedSession.freeIndex,
+        }
+      : null,
+  );
   const [extensiveConfig, setExtensiveConfig] =
     useState<ExtensiveConfig | null>(demoExtensiveConfig);
   const [quizStartedAt, setQuizStartedAt] = useState<number | null>(null);
@@ -97,8 +206,42 @@ export function V2App() {
   const [judgment, setJudgment] = useState(
     isDemo
       ? 'El bisturí te llama, pero tu perfil aún duda entre cortar y diagnosticar. Interesante... y preocupante a partes iguales.'
-      : '',
+      : savedSession?.judgment ?? '',
   );
+  const [showResume, setShowResume] = useState(
+    !!savedSession && (savedSession.stage === 'quiz' || savedSession.stage === 'extensive'),
+  );
+  const [reportId, setReportId] = useState(() =>
+    savedSession?.reportId ??
+    (savedSession?.stage === 'result' || isResultDemo ? createReportId() : ''),
+  );
+  const [completedAnswers, setCompletedAnswers] = useState<AnswerRecord[]>(() => {
+    if (!savedSession || savedSession.stage !== 'result') {
+      return isResultDemo ? SAMPLE_ANSWERS : [];
+    }
+    return savedSession.resultMode === 'extensive'
+      ? savedSession.extensiveAnswers
+      : savedSession.freeAnswers;
+  });
+  const [premiumAccess, setPremiumAccess] = useState<PremiumAccess | null>(() =>
+    loadPremiumAccess(),
+  );
+  const [premiumConfig, setPremiumConfig] = useState<PremiumConfig>(DEFAULT_PREMIUM_CONFIG);
+  const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+  const [premiumLoading, setPremiumLoading] = useState(false);
+  const [premiumDownloading, setPremiumDownloading] = useState(false);
+  const [premiumError, setPremiumError] = useState<string | null>(null);
+  const sessionEpoch = useRef(0);
+
+  const persist = (overrides: Partial<V2PersistedSession>) => {
+    const current = loadV2Session() ?? createEmptySession();
+    saveV2Session({
+      ...current,
+      ...overrides,
+      reportId: overrides.reportId ?? reportId,
+      version: 1,
+    });
+  };
 
   const reset = () => {
     setResult(null);
@@ -106,22 +249,91 @@ export function V2App() {
     setFreeResult(null);
     setFreeAnswers([]);
     setFreeAnswerTexts({});
+    setFreeInitial(null);
     setExtensiveConfig(null);
+    setCompletedAnswers([]);
     setJudgment('');
+    setReportId('');
+    setPremiumModalOpen(false);
+    setPremiumError(null);
   };
 
   const start = () => {
+    sessionEpoch.current += 1;
+    clearV2Session();
+    setShowResume(false);
     reset();
+    setReportId(createReportId());
     setQuizStartedAt(Date.now());
     setStage('quiz');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const home = () => {
+    sessionEpoch.current += 1;
+    clearV2Session();
+    setShowResume(false);
     reset();
     setStage('intro');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const navigate = (scene: V2NavScene) => {
+    setStage(scene);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/premium/config')
+      .then((response) => (response.ok ? response.json() : DEFAULT_PREMIUM_CONFIG))
+      .then((config: PremiumConfig) => {
+        if (!cancelled) setPremiumConfig({ ...DEFAULT_PREMIUM_CONFIG, ...config });
+      })
+      .catch(() => {
+        if (!cancelled) setPremiumConfig(DEFAULT_PREMIUM_CONFIG);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const premium = url.searchParams.get('premium');
+    if (!premium) return;
+
+    const sessionId = url.searchParams.get('session_id');
+    const queryReportId = url.searchParams.get('report_id');
+
+    if (premium === 'success' && sessionId && queryReportId) {
+      verifyPremiumSession(sessionId, queryReportId)
+        .then((access) => {
+          setPremiumAccess(access);
+          setReportId((current) => current || access.reportId);
+          savePremiumAccess(access);
+        })
+        .catch((error: Error) => {
+          setPremiumError(error.message || 'No se pudo verificar el pago.');
+        });
+    } else if (premium === 'cancel') {
+      setPremiumError('Pago cancelado. No se ha realizado ningún cargo.');
+    }
+
+    url.searchParams.delete('premium');
+    url.searchParams.delete('session_id');
+    url.searchParams.delete('report_id');
+    window.history.replaceState(
+      {},
+      '',
+      `${url.pathname}${url.search ? `?${url.searchParams.toString()}` : ''}`,
+    );
+  }, []);
+
+  useEffect(() => {
+    if (isDemo || !result || !reportId) return;
+    persist({ reportId });
+  }, [isDemo, reportId, result]);
 
   const completeFree = (
     nextResult: QuizResult,
@@ -132,14 +344,35 @@ export function V2App() {
     savePilotSession(createPilotSession(nextResult, answers, 'free', durationMs));
     setPilotCount(loadPilotSessions().length);
 
+    const nextReportId = reportId || createReportId();
+    if (!reportId) setReportId(nextReportId);
+
     setFreeResult(nextResult);
     setFreeAnswers(answers);
     setFreeAnswerTexts(answerTexts);
+    setCompletedAnswers(answers);
     setResult(nextResult);
     setResultMode('free');
     setJudgment('');
     setStage('result');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const epoch = sessionEpoch.current;
+
+    persist({
+      stage: 'result',
+      reportId: nextReportId,
+      freeAnswers: answers,
+      freeAnswerTexts: answerTexts,
+      freeIndex: QUICK_QUESTION_SET.questions.length,
+      freeResult: nextResult,
+      extensiveAnswers: [],
+      extensiveAnswerTexts: {},
+      extensiveIndex: 0,
+      result: nextResult,
+      resultMode: 'free',
+      judgment: '',
+    });
 
     const first = nextResult.top[0];
     if (first) {
@@ -147,13 +380,18 @@ export function V2App() {
         first.specialty.name,
         first.specialty.description,
         Object.values(answerTexts),
-      ).then(setJudgment);
+      ).then((text) => {
+        if (sessionEpoch.current !== epoch) return;
+        setJudgment(text);
+        persist({ judgment: text });
+      });
     }
   };
 
   const startExtensive = () => {
     if (!freeResult) return;
 
+    sessionEpoch.current += 1;
     setQuizStartedAt(Date.now());
     const branchQuestions = selectBranchQuestions(freeResult);
     setExtensiveConfig({
@@ -161,7 +399,23 @@ export function V2App() {
       scoringQuestionSet: buildScoringQuestionSet(QUICK_QUESTION_SET, branchQuestions),
       initialAnswers: freeAnswers,
       initialAnswerTexts: freeAnswerTexts,
+      initialIndex: 0,
       answeredOffset: QUICK_QUESTION_SET.questions.length,
+    });
+    setCompletedAnswers(freeAnswers);
+    persist({
+      stage: 'extensive',
+      reportId,
+      freeAnswers,
+      freeAnswerTexts,
+      freeIndex: QUICK_QUESTION_SET.questions.length,
+      freeResult,
+      extensiveAnswers: freeAnswers,
+      extensiveAnswerTexts: freeAnswerTexts,
+      extensiveIndex: 0,
+      result: null,
+      resultMode: 'free',
+      judgment: '',
     });
     setStage('extensive');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -176,11 +430,28 @@ export function V2App() {
     savePilotSession(createPilotSession(nextResult, answers, 'extensive', durationMs));
     setPilotCount(loadPilotSessions().length);
 
+    const nextReportId = reportId || createReportId();
+    if (!reportId) setReportId(nextReportId);
+
+    setCompletedAnswers(answers);
     setResult(nextResult);
     setResultMode('extensive');
     setJudgment('');
     setStage('result');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const epoch = sessionEpoch.current;
+
+    persist({
+      stage: 'result',
+      reportId: nextReportId,
+      extensiveAnswers: answers,
+      extensiveAnswerTexts: answerTexts,
+      extensiveIndex: extensiveConfig?.displayQuestions.length ?? 0,
+      result: nextResult,
+      resultMode: 'extensive',
+      judgment: '',
+    });
 
     const first = nextResult.top[0];
     if (first) {
@@ -188,8 +459,58 @@ export function V2App() {
         first.specialty.name,
         first.specialty.description,
         Object.values(answerTexts),
-      ).then(setJudgment);
+      ).then((text) => {
+        if (sessionEpoch.current !== epoch) return;
+        setJudgment(text);
+        persist({ judgment: text });
+      });
     }
+  };
+
+  const resumeSession = () => {
+    if (!savedSession) return;
+    setShowResume(false);
+
+    const resumeReportId = savedSession.reportId || createReportId();
+    setReportId(resumeReportId);
+
+    if (savedSession.stage === 'quiz') {
+      setFreeInitial({
+        answers: savedSession.freeAnswers,
+        texts: savedSession.freeAnswerTexts,
+        index: savedSession.freeIndex,
+      });
+      setFreeAnswers(savedSession.freeAnswers);
+      setFreeAnswerTexts(savedSession.freeAnswerTexts);
+      setStage('quiz');
+      return;
+    }
+
+    if (savedSession.stage === 'extensive' && savedSession.freeResult) {
+      const branchQuestions = selectBranchQuestions(savedSession.freeResult);
+      setFreeResult(savedSession.freeResult);
+      setFreeAnswers(savedSession.freeAnswers);
+      setFreeAnswerTexts(savedSession.freeAnswerTexts);
+      setCompletedAnswers(savedSession.freeAnswers);
+      setExtensiveConfig({
+        displayQuestions: getExtensiveDisplayQuestions(branchQuestions),
+        scoringQuestionSet: buildScoringQuestionSet(QUICK_QUESTION_SET, branchQuestions),
+        initialAnswers: savedSession.extensiveAnswers,
+        initialAnswerTexts: savedSession.extensiveAnswerTexts,
+        initialIndex: savedSession.extensiveIndex,
+        answeredOffset: QUICK_QUESTION_SET.questions.length,
+      });
+      setStage('extensive');
+    }
+  };
+
+  const discardResume = () => {
+    clearV2Session();
+    setShowResume(false);
+    setFreeInitial(null);
+    setCompletedAnswers([]);
+    setReportId('');
+    setStage('intro');
   };
 
   const clearPilot = () => {
@@ -197,180 +518,305 @@ export function V2App() {
     setPilotCount(0);
   };
 
+  const premiumUnlocked = !!premiumAccess && premiumAccess.reportId === reportId;
+  const premiumPaymentConfigured = premiumConfig.configured || premiumConfig.devUnlock;
+  const premiumPriceLabel = new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: premiumConfig.currency.toUpperCase(),
+  }).format(premiumConfig.priceCents / 100);
+
+  const handlePremiumUnlock = () => {
+    setPremiumError(null);
+    setPremiumModalOpen(true);
+  };
+
+  const handlePremiumCheckout = async () => {
+    if (!reportId) {
+      setPremiumError('No encontramos el identificador de este informe.');
+      return;
+    }
+
+    setPremiumLoading(true);
+    setPremiumError(null);
+    try {
+      const checkout = await startPremiumCheckout(reportId, resultMode as PremiumMode);
+      if (checkout.access) {
+        setPremiumAccess(checkout.access);
+        setPremiumModalOpen(false);
+      } else if (checkout.url) {
+        window.location.assign(checkout.url);
+      } else {
+        throw new Error('El servidor no devolvió una sesión de pago.');
+      }
+    } catch (error: any) {
+      setPremiumError(error?.message || 'No se pudo iniciar el pago.');
+    } finally {
+      setPremiumLoading(false);
+    }
+  };
+
+  const handlePremiumDownload = async () => {
+    if (!premiumAccess || !premiumUnlocked) {
+      setPremiumError('Este informe todavía no está desbloqueado.');
+      return;
+    }
+    if (completedAnswers.length === 0) {
+      setPremiumError('No encontramos las respuestas de este informe. Vuelve a realizar el test.');
+      return;
+    }
+
+    setPremiumDownloading(true);
+    setPremiumError(null);
+    try {
+      const blob = await downloadPremiumPdf(
+        premiumAccess,
+        completedAnswers,
+        resultMode as PremiumMode,
+      );
+      downloadBlob(blob, `Arcanum_Informe_${reportId.slice(0, 8)}.pdf`);
+    } catch (error: any) {
+      setPremiumError(error?.message || 'No se pudo generar el PDF.');
+    } finally {
+      setPremiumDownloading(false);
+    }
+  };
+
   return (
     <AtmosphericFrame>
-      <header className="w-full px-4 pt-6 sm:px-8">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Sparkles className="text-gold" size={18} />
-            <span className="font-magic text-sm tracking-widest text-gold sm:text-base">
-              Arcanum Medicum
-            </span>
-            <span className="rounded-full border border-medical-teal/30 bg-medical-teal/10 px-2 py-0.5 text-[8px] uppercase tracking-widest text-medical-teal">
-              Motor v2 · beta
-            </span>
-            {isDemo && (
-              <span className="rounded-full border border-gold/30 bg-gold/10 px-2 py-0.5 text-[8px] uppercase tracking-widest text-gold/80">
-                Vista demo
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            {(stage === 'intro' || stage === 'result') && (
+      {stage !== 'quiz' && stage !== 'extensive' && isV2NavScene(stage) && (
+        <V2Navbar
+          activeScene={stage}
+          onNavigate={navigate}
+          onStart={start}
+          pilotCount={pilotCount}
+          onExportPilot={() => downloadPilotSessions('json')}
+          onClearPilot={clearPilot}
+          isDemo={isDemo}
+        />
+      )}
+
+      {showResume && savedSession && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="glass-surface w-full max-w-md space-y-5 p-8 text-center">
+            <h2 className="font-display text-2xl font-bold text-gold">
+              Tienes un test sin terminar
+            </h2>
+            <p className="text-sm leading-relaxed text-parchment/65">
+              Puedes continuar donde lo dejaste o empezar de nuevo. Tu progreso se guarda solo en
+              este navegador.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
-                onClick={() => setStage('catalog')}
-                className="inline-flex items-center gap-1.5 text-[9px] uppercase tracking-widest text-parchment/40 transition-colors hover:text-gold"
+                onClick={resumeSession}
+                className="flex-1 border border-gold/60 bg-gold/15 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gold transition-colors hover:bg-gold/25"
               >
-                <BookOpen size={11} />
-                <span className="hidden sm:inline">Catálogo</span>
+                Continuar test
               </button>
-            )}
-            <button
-              onClick={() => downloadPilotSessions('json')}
-              title="Exportar sesiones anónimas del piloto en JSON"
-              className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 px-2 py-1 text-[9px] uppercase tracking-widest text-parchment/40 transition-colors hover:border-gold/50 hover:text-gold"
-            >
-              <Download size={11} />
-              <span className="hidden sm:inline">Piloto</span>
-              <span>{pilotCount}</span>
-            </button>
-            {pilotCount > 0 && (
               <button
-                onClick={clearPilot}
-                title="Borrar las sesiones guardadas del piloto"
-                className="text-parchment/25 transition-colors hover:text-rose-300"
+                onClick={discardResume}
+                className="flex-1 border border-gold/20 px-5 py-3 text-[10px] uppercase tracking-[0.2em] text-parchment/50 transition-colors hover:text-gold"
               >
-                <Trash2 size={12} />
+                Empezar de nuevo
               </button>
-            )}
-            <a
-              href="/"
-              className="text-[9px] uppercase tracking-widest text-parchment/40 transition-colors hover:text-gold"
-            >
-              Versión clásica
-            </a>
+            </div>
           </div>
         </div>
-      </header>
+      )}
 
-      {stage === 'intro' && (
-        <main className="flex flex-1 flex-col items-center px-4 pb-10 pt-16 sm:pt-24">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-5xl text-center"
-          >
-            <p className="text-[10px] uppercase tracking-[0.4em] text-medical-teal sm:text-xs">
-              Algoritmo de orientación vocacional médica
-            </p>
-            <h1 className="mt-2 text-3xl font-display font-bold uppercase tracking-widest text-gold magic-shadow sm:text-5xl">
-              No eliges tu especialidad.
-              <br />
-              Tu especialidad te elige a ti.
-            </h1>
-          </motion.div>
+      <V2PremiumModal
+        open={premiumModalOpen}
+        priceLabel={premiumPriceLabel}
+        isExtensive={resultMode === 'extensive'}
+        loading={premiumLoading}
+        error={premiumError}
+        onClose={() => setPremiumModalOpen(false)}
+        onCheckout={handlePremiumCheckout}
+      />
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.15, duration: 0.6 }}
-            className="mt-2 sm:mt-4"
-          >
-            <SortingHat />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-14 w-full max-w-xl space-y-6 text-center sm:mt-20"
-          >
-            <p className="font-classic text-xl italic leading-relaxed text-parchment/80 sm:text-2xl">
-              Catorce preguntas. Un perfil vocacional. Las cinco especialidades que más encajan contigo.
-              Sin registro y sin promesas de certeza.
-            </p>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={start}
-              className="group relative mx-auto block overflow-hidden px-10 py-5"
+      <div
+        className={`flex flex-1 flex-col ${
+          stage === 'quiz' || stage === 'extensive' ? '' : 'pt-20 sm:pt-24'
+        }`}
+      >
+        {stage === 'intro' && (
+          <main className="flex flex-1 flex-col items-center px-4 pb-10">
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full max-w-5xl text-center"
             >
-              <div className="absolute inset-0 border border-gold/30 bg-gold/5 backdrop-blur-md transition-colors duration-500 group-hover:border-gold" />
-              <div className="absolute inset-[3px] border border-gold/10" />
-              <div className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
-              <div className="absolute right-0 top-0 h-3 w-3 border-r-2 border-t-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
-              <div className="absolute bottom-0 left-0 h-3 w-3 border-b-2 border-l-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
-              <div className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
-              <span className="relative z-10 flex items-center gap-4 text-sm font-bold uppercase tracking-[0.3em] text-gold sm:text-base">
-                <Sparkles size={16} className="text-gold/60" />
-                Someterme al Juicio
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              <p className="text-[10px] uppercase tracking-[0.4em] text-medical-teal sm:text-xs">
+                Algoritmo de orientación vocacional médica
+              </p>
+              <h1 className="mt-2 font-display text-3xl font-bold uppercase tracking-widest text-gold magic-shadow sm:text-5xl">
+                No eliges tu especialidad.
+                <br />
+                Tu especialidad te elige a ti.
+              </h1>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15, duration: 0.6 }}
+              className="mt-2 sm:mt-4"
+            >
+              <SortingHat />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-14 w-full max-w-xl space-y-6 text-center sm:mt-20"
+            >
+              <p className="font-classic text-xl italic leading-relaxed text-parchment/80 sm:text-2xl">
+                Catorce preguntas. Un perfil vocacional. Las cinco especialidades que más encajan
+                contigo. Sin registro y sin promesas de certeza.
+              </p>
+
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={start}
+                className="group relative mx-auto block overflow-hidden px-10 py-5"
+              >
+                <div className="absolute inset-0 border border-gold/30 bg-gold/5 backdrop-blur-md transition-colors duration-500 group-hover:border-gold" />
+                <div className="absolute inset-[3px] border border-gold/10" />
+                <div className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
+                <div className="absolute right-0 top-0 h-3 w-3 border-r-2 border-t-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
+                <div className="absolute bottom-0 left-0 h-3 w-3 border-b-2 border-l-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
+                <div className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-gold/50 transition-all duration-300 group-hover:h-5 group-hover:w-5" />
+                <span className="relative z-10 flex items-center gap-4 text-sm font-bold uppercase tracking-[0.3em] text-gold sm:text-base">
+                  <Sparkles size={16} className="text-gold/60" />
+                  Someterme al Juicio
+                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                </span>
+              </motion.button>
+
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[9px] uppercase tracking-widest text-parchment/35">
+                <span>14 preguntas</span>
+                <span className="text-gold/30">·</span>
+                <span>Top 5 especialidades</span>
+                <span className="text-gold/30">·</span>
+                <span>Resultado orientativo</span>
+              </div>
+            </motion.div>
+
+            <footer className="mt-auto flex w-full max-w-4xl items-center justify-between gap-6 px-4 pt-12">
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-medical-teal sm:text-xs">
+                  Esperando Aspirante
+                </span>
+                <div className="h-[2px] w-32 bg-medical-teal/10 sm:w-48" />
+              </div>
+              <span className="font-mono text-[9px] uppercase tracking-widest text-medical-teal/40">
+                V2 · 51 especialidades activas
               </span>
-            </motion.button>
+            </footer>
+          </main>
+        )}
 
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[9px] uppercase tracking-widest text-parchment/35">
-              <span>14 preguntas</span>
-              <span className="text-gold/30">·</span>
-              <span>Top 5 especialidades</span>
-              <span className="text-gold/30">·</span>
-              <span>Resultado orientativo</span>
-            </div>
-          </motion.div>
+        {stage === 'quiz' && (
+          <main className="flex flex-1 items-start justify-center">
+            <V2Quiz
+              initialAnswers={freeInitial?.answers ?? []}
+              initialAnswerTexts={freeInitial?.texts ?? {}}
+              initialIndex={freeInitial?.index ?? 0}
+              onComplete={completeFree}
+              onProgress={(index, answers, answerTexts) =>
+                persist({
+                  stage: 'quiz',
+                  freeAnswers: answers,
+                  freeAnswerTexts: answerTexts,
+                  freeIndex: index,
+                  freeResult: null,
+                  extensiveAnswers: [],
+                  extensiveAnswerTexts: {},
+                  extensiveIndex: 0,
+                  result: null,
+                  resultMode: 'free',
+                  judgment: '',
+                })
+              }
+              onCancel={home}
+            />
+          </main>
+        )}
 
-          <footer className="mt-auto flex w-full max-w-4xl items-center justify-between gap-6 px-4 pt-12">
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-medical-teal sm:text-xs">
-                Esperando Aspirante
-              </span>
-              <div className="h-[2px] w-32 bg-medical-teal/10 sm:w-48" />
-            </div>
-            <span className="font-mono text-[9px] uppercase tracking-widest text-medical-teal/40">
-              Motor v2 · 51 especialidades activas
-            </span>
-          </footer>
-        </main>
-      )}
+        {stage === 'extensive' && extensiveConfig && (
+          <main className="flex flex-1 items-start justify-center">
+            <V2Quiz
+              questions={extensiveConfig.displayQuestions}
+              scoringQuestionSet={extensiveConfig.scoringQuestionSet}
+              initialAnswers={extensiveConfig.initialAnswers}
+              initialAnswerTexts={extensiveConfig.initialAnswerTexts}
+              initialIndex={extensiveConfig.initialIndex}
+              answeredOffset={extensiveConfig.answeredOffset}
+              modeLabel={`Test extensivo beta · ${extensiveConfig.answeredOffset + extensiveConfig.displayQuestions.length} preguntas · el Sombrero sigue leyendo`}
+              onComplete={completeExtensive}
+              onProgress={(index, answers, answerTexts) =>
+                persist({
+                  stage: 'extensive',
+                  extensiveAnswers: answers,
+                  extensiveAnswerTexts: answerTexts,
+                  extensiveIndex: index,
+                })
+              }
+              onCancel={() => {
+                if (freeResult) {
+                  setResult(freeResult);
+                  setResultMode('free');
+                  setStage('result');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                  navigate('intro');
+                }
+              }}
+            />
+          </main>
+        )}
 
-      {stage === 'quiz' && (
-        <main className="flex flex-1 items-start justify-center">
-          <V2Quiz onComplete={completeFree} onCancel={home} />
-        </main>
-      )}
+        {stage === 'result' && result && (
+          <main className="flex flex-1 items-start justify-center">
+            <V2Result
+              result={result}
+              judgment={judgment}
+              isExtensive={resultMode === 'extensive'}
+              reportId={reportId}
+              premiumAccess={premiumAccess}
+              premiumPriceLabel={premiumPriceLabel}
+              paymentConfigured={premiumPaymentConfigured}
+              onUnlockPremium={handlePremiumUnlock}
+              onDownloadPremium={handlePremiumDownload}
+              premiumDownloading={premiumDownloading}
+              premiumError={premiumError}
+              onStartExtensive={freeResult ? startExtensive : undefined}
+              onRestart={start}
+              onHome={home}
+            />
+          </main>
+        )}
 
-      {stage === 'extensive' && extensiveConfig && (
-        <main className="flex flex-1 items-start justify-center">
-          <V2Quiz
-            questions={extensiveConfig.displayQuestions}
-            scoringQuestionSet={extensiveConfig.scoringQuestionSet}
-            initialAnswers={extensiveConfig.initialAnswers}
-            initialAnswerTexts={extensiveConfig.initialAnswerTexts}
-            answeredOffset={extensiveConfig.answeredOffset}
-            modeLabel={`Test extensivo beta · ${extensiveConfig.answeredOffset + extensiveConfig.displayQuestions.length} preguntas · el Sombrero sigue leyendo`}
-            onComplete={completeExtensive}
-            onCancel={() => setStage('result')}
-          />
-        </main>
-      )}
+        {stage === 'catalog' && (
+          <main className="flex flex-1 items-start justify-center">
+            <V2Catalog onBack={() => navigate('intro')} />
+          </main>
+        )}
 
-      {stage === 'result' && result && (
-        <main className="flex flex-1 items-start justify-center">
-          <V2Result
-            result={result}
-            judgment={judgment}
-            isExtensive={resultMode === 'extensive'}
-            onStartExtensive={freeResult ? startExtensive : undefined}
-            onRestart={start}
-            onHome={home}
-          />
-        </main>
-      )}
-
-      {stage === 'catalog' && (
-        <main className="flex flex-1 items-start justify-center">
-          <V2Catalog onBack={home} />
-        </main>
-      )}
+        {stage === 'blog' && <V2Blog />}
+        {stage === 'about' && <V2About onOpenCatalog={() => navigate('catalog')} />}
+        {stage === 'stats' && (
+          <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
+            <StatsView />
+          </main>
+        )}
+        {stage === 'oracle' && (
+          <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
+            <OracleView />
+          </main>
+        )}
+      </div>
     </AtmosphericFrame>
   );
 }

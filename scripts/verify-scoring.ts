@@ -483,8 +483,8 @@ function main(): void {
 
   verifyPersonas();
   verifyEmptyAnswers();
-  verifyStability();
   verifyReachability();
+  console.log('\nEstabilidad: ejecuta `npm run verify:stability` para el arnés determinista.');
 
   for (const persona of PERSONAS) {
     printResult(persona);

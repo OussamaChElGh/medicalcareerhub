@@ -1,17 +1,18 @@
 import { SpecialtyProfile, SystemKey } from '../types';
+import { REVIEW_EVIDENCE } from './specialtyEvidence';
 
 export const SPECIALTY_CATALOG_VERSION = '2026-10-17-catalog51-a10';
 
 type RawSpecialty = Omit<SpecialtyProfile, 'systems'>;
 
 function newProfile(
-  data: Omit<SpecialtyProfile, 'system' | 'status' | 'reviewStatus' | 'source' | 'systems'>,
+  data: Omit<SpecialtyProfile, 'system' | 'status' | 'source' | 'systems'>,
 ): RawSpecialty {
   return {
     system: 'ES',
     status: 'active',
     reviewStatus: 'draft',
-    source: 'Perfil preliminar basado en práctica clínica general; revisión experta pendiente.',
+    source: 'Perfil preliminar basado en práctica clínica general; validación clínica pendiente.',
     ...data,
   };
 }
@@ -1038,6 +1039,14 @@ const SYSTEMS_BY_ID: Record<string, SystemKey[]> = {
 export const ACTIVE_SPECIALTIES: SpecialtyProfile[] = RAW_SPECIALTIES.map((specialty) => ({
   ...specialty,
   systems: SYSTEMS_BY_ID[specialty.id] ?? ['multisystem'],
+  evidence: {
+    ...specialty.evidence,
+    ...REVIEW_EVIDENCE[specialty.id],
+  },
+  reviewStatus: specialty.reviewStatus ?? 'draft',
+  source:
+    specialty.source ??
+    'Perfil heredado; validación clínica pendiente.',
 }));
 
 export const ACTIVE_SPECIALTY_IDS = ACTIVE_SPECIALTIES.map((specialty) => specialty.id);

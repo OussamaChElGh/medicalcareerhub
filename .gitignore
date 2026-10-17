@@ -4,5 +4,9 @@ dist/
 coverage/
 .DS_Store
 *.log
+.dev-server.pid
+.dev-server.log
+.dev-server.out.log
+.dev-server.err.log
 .env*
 !.env.example

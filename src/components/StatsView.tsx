@@ -44,6 +44,7 @@ export const StatsView: React.FC = () => {
                   outerRadius={100}
                   paddingAngle={5}
                   dataKey="value"
+                  isAnimationActive={false}
                 >
                   {ACADEMY_STATS.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

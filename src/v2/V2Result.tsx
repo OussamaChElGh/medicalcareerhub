@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { motion } from 'motion/react';
 import {
   ArrowLeftRight,
-  CheckCircle2,
   Home,
   Lock,
   RefreshCw,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import {
@@ -22,17 +19,26 @@ import {
   buildDuelLockedCopy,
   buildDuelTeaser,
   buildFreeHeadline,
-  buildPremiumHeadline,
   confidenceLabel,
   deriveHouse,
 } from '../lib/narrative';
+import { PremiumAccess } from '../lib/premium';
 import { MatchBand, QuizResult } from '../types';
 import { V2HatPanel } from './V2HatPanel';
+import { V2PremiumReport } from './V2PremiumReport';
 
 interface V2ResultProps {
   result: QuizResult;
   judgment?: string;
   isExtensive?: boolean;
+  reportId: string;
+  premiumAccess: PremiumAccess | null;
+  premiumPriceLabel: string;
+  paymentConfigured: boolean;
+  onUnlockPremium: () => void;
+  onDownloadPremium: () => void;
+  premiumDownloading: boolean;
+  premiumError?: string | null;
   onStartExtensive?: () => void;
   onRestart: () => void;
   onHome: () => void;
@@ -48,11 +54,18 @@ export function V2Result({
   result,
   judgment = '',
   isExtensive = false,
+  reportId,
+  premiumAccess,
+  premiumPriceLabel,
+  paymentConfigured,
+  onUnlockPremium,
+  onDownloadPremium,
+  premiumDownloading,
+  premiumError,
   onStartExtensive,
   onRestart,
   onHome,
 }: V2ResultProps) {
-  const [showPremium, setShowPremium] = useState(false);
   const first = result.top[0];
   const second = result.top[1];
   const displayedMatches = isExtensive ? result.matches.slice(0, 10) : result.top;
@@ -334,87 +347,30 @@ export function V2Result({
             </div>
           </section>
 
-          <section className="space-y-5 border border-gold/30 bg-gradient-to-b from-gold/[0.08] to-transparent p-6 sm:p-8">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="text-gold" size={24} />
-              <div>
-                <h2 className="font-display text-xl font-bold tracking-wide text-gold">
-                  Informe completo
-                </h2>
-                <p className="text-[10px] uppercase tracking-widest text-parchment/40">
-                  Ranking completo · comparación eje por eje · PDF
-                </p>
-              </div>
-            </div>
-
-            <ul className="grid grid-cols-1 gap-2 text-sm text-parchment/70 sm:grid-cols-2">
-              {[
-                isExtensive ? 'Motivos del 2 al 10' : 'Motivos del 2 al 5',
-                'Fricciones de cada especialidad',
-                'Comparación cara a cara',
-                'Ranking completo de especialidades',
-                'Itinerario para resolver el desempate',
-                'Informe PDF descargable',
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0 text-medical-teal/70" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-
-            {!isExtensive && (
-              <p className="text-sm leading-relaxed text-parchment/65">
-                El test gratuito deja tu primer puesto abierto. El test extensivo añade 24 preguntas
-                dirigidas a los ejes que separan tus dos primeras especialidades y sube la confianza
-                del perfil.
-              </p>
-            )}
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-              {!isExtensive && onStartExtensive && (
-                <button
-                  onClick={onStartExtensive}
-                  className="inline-flex w-full items-center justify-center gap-2 border border-gold/60 bg-gold/15 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-gold transition-all hover:bg-gold/25 sm:w-auto"
-                >
-                  <Sparkles size={14} />
-                  Hacer el test extensivo (beta)
-                </button>
-              )}
+          {!isExtensive && onStartExtensive && !result.duel && (
+            <div className="border border-gold/20 bg-gold/5 p-4">
               <button
-                onClick={() => setShowPremium((current) => !current)}
-                className="inline-flex w-full items-center justify-center gap-2 border border-gold/25 bg-black/20 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-parchment/70 transition-all hover:border-gold/50 hover:text-gold sm:w-auto"
+                onClick={onStartExtensive}
+                className="inline-flex w-full items-center justify-center gap-2 border border-gold/60 bg-gold/15 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-gold transition-all hover:bg-gold/25 sm:w-auto"
               >
-                {showPremium
-                  ? 'Ocultar detalle'
-                  : isExtensive
-                    ? 'Ver detalle del informe'
-                    : 'Ver qué incluye'}
+                <Sparkles size={14} />
+                Hacer el test extensivo (beta)
               </button>
             </div>
+          )}
 
-            {showPremium && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="space-y-3 overflow-hidden border-t border-gold/15 pt-4"
-              >
-                <p className="text-sm leading-relaxed text-parchment/65">
-                  {isExtensive
-                    ? 'Has completado el test extensivo. El informe completo añade el ranking de 51 especialidades, los motivos del segundo al décimo puesto, las fricciones de cada opción y la comparación eje por eje. Se desbloqueará al conectar el pago.'
-                    : 'El informe completo añade el ranking de 51 especialidades, los motivos del segundo al quinto puesto, las fricciones de cada opción y una comparación eje por eje.'}
-                </p>
-                {first && (
-                  <p className="text-xs italic text-parchment/45">
-                    Ejemplo de lo que verías: {buildPremiumHeadline(first)}
-                  </p>
-                )}
-                <div className="rounded-sm border border-medical-teal/25 bg-medical-teal/5 px-4 py-3 text-[10px] uppercase tracking-widest text-medical-teal/80">
-                  Flujo de pago pendiente de conectar en la siguiente fase.
-                </div>
-              </motion.div>
-            )}
-          </section>
+          <V2PremiumReport
+            result={result}
+            isExtensive={isExtensive}
+            reportId={reportId}
+            access={premiumAccess}
+            priceLabel={premiumPriceLabel}
+            paymentConfigured={paymentConfigured}
+            onUnlock={onUnlockPremium}
+            onDownload={onDownloadPremium}
+            downloading={premiumDownloading}
+            error={premiumError}
+          />
 
           <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
             <button
@@ -436,7 +392,7 @@ export function V2Result({
 
           <p className="text-center text-[9px] leading-relaxed tracking-wide text-parchment/25">
             Este resultado es orientativo y no constituye una recomendación definitiva. Los perfiles de
-            las especialidades son una primera versión en revisión. La Casa es un arquetipo narrativo,
+            las especialidades son preliminares y están en beta. La Casa es un arquetipo narrativo,
             no un criterio de recomendación.
           </p>
         </div>

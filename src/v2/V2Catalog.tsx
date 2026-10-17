@@ -26,10 +26,6 @@ const GROUPS: { type: SpecialtyProfile['type']; label: string; description: stri
 ];
 
 export function V2Catalog({ onBack }: V2CatalogProps) {
-  const draftCount = ACTIVE_SPECIALTIES.filter(
-    (specialty) => specialty.reviewStatus === 'draft',
-  ).length;
-
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 sm:py-12">
       <button
@@ -51,16 +47,15 @@ export function V2Catalog({ onBack }: V2CatalogProps) {
           51 especialidades y áreas
         </h1>
         <p className="max-w-2xl font-classic text-lg italic leading-relaxed text-parchment/65">
-          Fichas descriptivas del catálogo v2. Las 39 fichas nuevas están marcadas como “en
-          revisión”: son una primera versión basada en práctica clínica general, pendiente de
-          revisión experta.
+          Fichas descriptivas del catálogo v2 en beta. Los perfiles son preliminares: sirven para
+          orientar, pero no han sido validados clínicamente ni sustituyen la información oficial.
         </p>
         <div className="flex flex-wrap gap-2 text-[9px] uppercase tracking-widest">
           <span className="rounded-full border border-gold/20 px-3 py-1 text-gold-dim">
             {ACTIVE_SPECIALTIES.length} fichas
           </span>
           <span className="rounded-full border border-amber-400/25 bg-amber-400/5 px-3 py-1 text-amber-200/70">
-            {draftCount} en revisión
+            Beta
           </span>
         </div>
       </header>
@@ -107,11 +102,6 @@ export function V2Catalog({ onBack }: V2CatalogProps) {
                           {specialty.family}
                         </p>
                       </div>
-                      {specialty.reviewStatus === 'draft' && (
-                        <span className="flex-shrink-0 rounded-full border border-amber-400/25 bg-amber-400/5 px-2 py-0.5 text-[7px] uppercase tracking-widest text-amber-200/70">
-                          En revisión
-                        </span>
-                      )}
                     </div>
                     <p className="text-xs leading-relaxed text-parchment/55">
                       {specialty.description}

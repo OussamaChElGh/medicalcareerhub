@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Book, Info, Home, ShieldCheck, Newspaper, Sparkles, Menu, X, BarChart3, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Book, Info, Home, ShieldCheck, Newspaper, Sparkles, Menu, X, BarChart3, MessageCircle } from 'lucide-react';
 
 interface NavbarProps {
   onNavigate: (scene: any) => void;
@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeScene }) => {
   return (
     <div className="absolute lg:fixed top-0 left-0 w-full z-50 flex justify-center pointer-events-none">
       <motion.nav 
-        initial={{ y: -50, opacity: 0 }}
+        initial={false}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: "circOut" }}
         className="pointer-events-auto flex items-center justify-between bg-academy-navy/95 backdrop-blur-3xl border-b border-gold/20 w-full px-4 py-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all duration-700 sm:px-6"
@@ -86,6 +86,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeScene }) => {
 
         {/* RIGHT SECTION: CTA (Desktop) / Hamburger (Mobile) */}
         <div className="flex items-center space-x-2">
+          <a
+            href="/"
+            className="hidden text-[9px] uppercase tracking-widest text-parchment/40 transition-colors hover:text-gold lg:inline"
+          >
+            Versión V2
+          </a>
           {/* Desktop CTA */}
           <div className="hidden sm:block">
             <button
@@ -148,6 +154,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, activeScene }) => {
                 <Sparkles size={18} />
                 <span className="text-xs uppercase tracking-[0.3em] font-bold">Diagnóstico</span>
               </button>
+              <a
+                href="/"
+                className="flex items-center space-x-4 rounded-xl border border-medical-teal/20 bg-medical-teal/5 p-4 text-medical-teal"
+              >
+                <ArrowLeft size={18} />
+                <span className="text-xs uppercase tracking-[0.3em] font-bold">Volver a la V2</span>
+              </a>
             </div>
           </motion.div>
         )}

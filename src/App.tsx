@@ -4,15 +4,13 @@ import { AtmosphericFrame } from './components/AtmosphericFrame';
 import { SortingHat } from './components/SortingHat';
 import { TypewriterText } from './components/TypewriterText';
 import { Navbar } from './components/Navbar';
-import { PaymentInterface } from './components/PaymentInterface';
 import { StatsView } from './components/StatsView';
 import { OracleView } from './components/OracleView';
 import { QUICK_QUESTIONS, EXTENSIVE_QUESTIONS, SPECIALTIES_MAP, BLOG_POSTS } from './constants';
 import { Scene, Specialty, Option, QuizType, BlogPost } from './types';
 import { getHatThought, getFinalJudgment } from './lib/gemini';
-import { generateMedicalReportPDF } from './lib/pdfReport';
 import { generateDossierPDF } from './lib/dossierPdf';
-import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, Shield, CheckCircle2, Circle, CreditCard, Zap, Crown, Newspaper, Calendar, User, ArrowLeft, FileDown, FileCheck, Check } from 'lucide-react';
+import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, CheckCircle2, Circle, Zap, Crown, Newspaper, Calendar, User, ArrowLeft, FileDown, Check } from 'lucide-react';
 
 export default function App() {
   const [scene, setScene] = useState<Scene>('HOME');
@@ -26,9 +24,7 @@ export default function App() {
   const [result, setResult] = useState<Specialty | null>(null);
   const [personalizedJudgment, setPersonalizedJudgment] = useState<string>("");
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
-  const [candidateName, setCandidateName] = useState<string>("");
-  const [isDownloadingPDF, setIsDownloadingPDF] = useState<boolean>(false);
-  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
+
 
   const activeQuestions = useMemo(() => {
     return quizType === 'EXTENSIVE' ? EXTENSIVE_QUESTIONS : QUICK_QUESTIONS;
@@ -54,32 +50,9 @@ export default function App() {
 
   const handleModeSelection = (type: QuizType) => {
     if (type === 'EXTENSIVE') {
-      setScene('PAYMENT');
+      window.location.assign('/');
     } else {
       startQuiz('QUICK');
-    }
-  };
-
-  const handlePaymentSuccess = () => {
-    startQuiz('EXTENSIVE');
-  };
-
-  const handleDownloadReport = () => {
-    if (!result) return;
-    setIsDownloadingPDF(true);
-    try {
-      generateMedicalReportPDF({
-        result,
-        judgment: personalizedJudgment || result.description,
-        quizType,
-        candidateName: candidateName.trim() || "Aspirante MIR / Facultativo",
-      });
-      setDownloadSuccess(true);
-      setTimeout(() => setDownloadSuccess(false), 4500);
-    } catch (error) {
-      console.error("Error generating report PDF:", error);
-    } finally {
-      setIsDownloadingPDF(false);
     }
   };
 
@@ -514,19 +487,19 @@ export default function App() {
                       <Sparkles size={32} className="text-gold" />
                       <div>
                         <h3 className="text-xl text-gold font-sans tracking-wide">Perfil Profesional Completo</h3>
-                        <p className="text-[10px] text-gold/80 font-bold uppercase tracking-widest mt-1">Acceso Premium</p>
+                        <p className="text-[10px] text-gold/80 font-bold uppercase tracking-widest mt-1">Disponible en la V2</p>
                       </div>
                       <p className="text-xs text-parchment/70 leading-relaxed italic">
-                        60 ítems detallados. Obtenga un informe exhaustivo de compatibilidad con todas las especialidades.
+                        El test adaptativo y el informe premium se han trasladado a la versión actual.
                       </p>
                     </button>
                   </div>
 
                   <a
-                    href="?v2=1"
+                    href="/"
                     className="inline-flex items-center justify-center gap-2 border border-medical-teal/30 bg-medical-teal/10 px-5 py-2.5 text-[10px] uppercase tracking-widest text-medical-teal transition-colors hover:bg-medical-teal/20"
                   >
-                    Probar el nuevo motor v2 (beta)
+                    Volver a la versión actual
                   </a>
 
                   <button
@@ -535,39 +508,6 @@ export default function App() {
                   >
                     Regresar al Umbral
                   </button>
-                </motion.div>
-              )}
-
-              {scene === 'PAYMENT' && (
-                <motion.div
-                  key="payment"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="glass-surface p-8 sm:p-12 space-y-8 w-full shadow-2xl max-w-md mx-auto relative overflow-hidden"
-                >
-                  <div className="relative z-10 text-center space-y-6">
-                    <div className="space-y-2">
-                       <h2 className="text-2xl font-display font-bold text-parchment tracking-widest magic-shadow uppercase">Ofrenda a la Academia</h2>
-                       <p className="text-parchment/60 text-sm italic">Desbloquea el Examen Arcano completo</p>
-                    </div>
-
-                    <div className="bg-white/5 p-6 rounded-sm border border-gold/10 space-y-4">
-                      <div className="flex justify-between items-center text-parchment">
-                        <span className="font-magic text-sm tracking-wide">Examen de 60 Dictámenes</span>
-                        <span className="font-mono text-gold font-bold">4.99 EUR</span>
-                      </div>
-                    </div>
-
-                    <PaymentInterface 
-                      onSuccess={handlePaymentSuccess} 
-                      onCancel={() => setScene('SELECTION')} 
-                    />
-
-                    <p className="text-[9px] text-parchment/30 uppercase tracking-tighter mt-4">
-                      Pago seguro a través de Gringotts Express
-                    </p>
-                  </div>
                 </motion.div>
               )}
 
@@ -776,70 +716,26 @@ export default function App() {
                     </div>
                   </div>
  
-                  {/* Official PDF Medical Report Download Card */}
                   <div className="pt-6 border-t border-gold/20">
-                    <div className="bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-gold/30 rounded-2xl p-6 sm:p-8 space-y-6 text-center max-w-xl mx-auto shadow-[0_15px_35px_rgba(0,0,0,0.4)]">
-                      <div className="space-y-2">
-                        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-medical-teal/10 border border-medical-teal/30 text-medical-teal text-[10px] uppercase font-mono tracking-widest">
-                          <Shield size={12} />
-                          <span>Expediente Clínico Certificado</span>
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-display font-bold text-parchment tracking-wide">
-                          Descargar Informe Médico Oficial
-                        </h3>
-                        <p className="text-xs sm:text-sm text-parchment/65 font-sans italic leading-relaxed">
-                          Emite tu informe formal con cabecera clínica institucional, número de expediente, dictamen del Sombrero y fundamentación psicotécnica en formato PDF para impresión o currículum.
-                        </p>
+                    <div className="max-w-xl mx-auto space-y-4 border border-gold/30 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-6 text-center sm:p-8">
+                      <div className="inline-flex items-center space-x-2 rounded-full border border-medical-teal/30 bg-medical-teal/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-medical-teal">
+                        <Sparkles size={12} />
+                        <span>Informe premium en la V2</span>
                       </div>
-
-                      {/* Optional Candidate Name input */}
-                      <div className="max-w-md mx-auto space-y-1.5 text-left">
-                        <label className="text-[10px] uppercase tracking-wider text-gold-dim font-mono block pl-1">
-                          Nombre del Facultativo o Aspirante (opcional)
-                        </label>
-                        <input
-                          type="text"
-                          value={candidateName}
-                          onChange={(e) => setCandidateName(e.target.value)}
-                          placeholder="Ej: Dr. Alejandro Valdés o Dra. María Navarro"
-                          className="w-full bg-black/40 border border-gold/25 rounded-xl px-4 py-2.5 text-sm text-parchment placeholder-parchment/30 focus:outline-none focus:border-gold transition-colors"
-                        />
-                      </div>
-
-                      {/* Download CTA Button */}
-                      <div className="pt-1 flex flex-col items-center">
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleDownloadReport}
-                          disabled={isDownloadingPDF}
-                          className="group relative px-8 py-4 bg-gradient-to-r from-gold via-gold-light to-gold text-academy-navy font-bold rounded-xl overflow-hidden shadow-[0_10px_25px_rgba(197,160,89,0.3)] hover:shadow-[0_15px_35px_rgba(197,160,89,0.5)] transition-all flex items-center space-x-3 cursor-pointer disabled:opacity-50"
-                        >
-                          {downloadSuccess ? (
-                            <>
-                              <FileCheck size={20} className="text-emerald-800" />
-                              <span className="uppercase tracking-widest text-xs font-bold text-emerald-900">
-                                ¡Informe Descargado!
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <FileDown size={20} className="group-hover:-translate-y-0.5 transition-transform" />
-                              <span className="uppercase tracking-widest text-xs font-bold">
-                                {isDownloadingPDF ? 'Generando PDF...' : 'Descargar Informe (PDF)'}
-                              </span>
-                            </>
-                          )}
-                        </motion.button>
-
-                        <div className="flex items-center space-x-3 mt-3 text-[10px] text-parchment/40 font-mono">
-                          <span>A4 Estándar</span>
-                          <span>•</span>
-                          <span>Firma Digital PKI</span>
-                          <span>•</span>
-                          <span>Cabecera Institucional</span>
-                        </div>
-                      </div>
+                      <h3 className="font-display text-xl font-bold tracking-wide text-parchment sm:text-2xl">
+                        Ranking completo y PDF
+                      </h3>
+                      <p className="text-xs leading-relaxed text-parchment/65 sm:text-sm">
+                        El informe completo con el ranking de 51 especialidades, la comparación de
+                        ejes y el PDF se genera en la versión actual de Arcanum Medicum.
+                      </p>
+                      <a
+                        href="/"
+                        className="inline-flex items-center justify-center gap-2 border border-gold/50 bg-gold/10 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gold transition-colors hover:bg-gold/20"
+                      >
+                        Abrir la versión actual
+                        <ArrowRight size={14} />
+                      </a>
                     </div>
                   </div>
 

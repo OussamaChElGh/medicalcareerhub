@@ -154,7 +154,7 @@ export interface SpecialtyConstraintProfile {
   research: number;
 }
 
-export type SpecialtyReviewStatus = 'draft' | 'reviewed';
+export type SpecialtyReviewStatus = 'draft' | 'in_review' | 'reviewed';
 
 export interface SpecialtyProfile {
   id: string;
@@ -172,7 +172,11 @@ export interface SpecialtyProfile {
   constraints: SpecialtyConstraintProfile;
   alternatives: string[];
   evidence?: Partial<Record<DimensionId, string>>;
+  constraintEvidence?: Partial<Record<keyof SpecialtyConstraintProfile, string>>;
   reviewStatus?: SpecialtyReviewStatus;
+  reviewNotes?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
   source?: string;
 }
 

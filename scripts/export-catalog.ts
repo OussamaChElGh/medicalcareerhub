@@ -33,7 +33,6 @@ function detail(specialty: SpecialtyProfile): string {
     `- **Tipo:** ${specialty.type}`,
     `- **Familia:** ${specialty.family}`,
     `- **Estado:** ${specialty.status}`,
-    `- **Revisión:** ${specialty.reviewStatus ?? 'legacy'}`,
     `- **Descripción:** ${specialty.description}`,
     `- **Perfil:** ${numericLine(specialty)}`,
     `- **Población:** ${labelList(specialty.populations, POPULATION_LABELS)}`,
@@ -58,9 +57,14 @@ function main(): void {
     return counts;
   }, {});
 
-  const draft = ACTIVE_SPECIALTIES.filter(
-    (specialty) => (specialty.reviewStatus ?? 'legacy') === 'draft',
-  ).length;
+  const reviewCounts = ACTIVE_SPECIALTIES.reduce<Record<string, number>>(
+    (counts, specialty) => {
+      const status = specialty.reviewStatus ?? 'legacy';
+      counts[status] = (counts[status] ?? 0) + 1;
+      return counts;
+    },
+    {},
+  );
 
   const lines: string[] = [
     '# Catálogo de especialidades v1',
@@ -73,7 +77,7 @@ function main(): void {
     `- MIR: ${byType.MIR ?? 0}.`,
     `- ACE: ${byType.ACE ?? 0}.`,
     `- Áreas: ${byType.AREA ?? 0}.`,
-    `- Fichas en estado draft: ${draft}.`,
+    `- Perfiles preliminares: ${reviewCounts.draft ?? 0}.`,
     '',
     '## Fichas',
     '',

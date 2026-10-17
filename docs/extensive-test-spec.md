@@ -88,7 +88,6 @@ docs/question-audit-v1.md         # hallazgos y cambios aplicados
 
 ## Fuera de alcance de esta fase
 
-- Revisión experta de los 39 perfiles en `draft`.
-- Pago y entitlement.
+- Validación clínica formal del catálogo, si se decide hacerla.
 - Traducción al inglés.
 - Generación de imágenes de las Casas.

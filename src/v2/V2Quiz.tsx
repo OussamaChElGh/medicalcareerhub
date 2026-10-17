@@ -13,9 +13,11 @@ interface V2QuizProps {
   scoringQuestionSet?: QuestionSet;
   initialAnswers?: AnswerRecord[];
   initialAnswerTexts?: Record<string, string>;
+  initialIndex?: number;
   answeredOffset?: number;
   modeLabel?: string;
   onComplete: (result: QuizResult, answers: AnswerRecord[], answerTexts: Record<string, string>) => void;
+  onProgress?: (index: number, answers: AnswerRecord[], answerTexts: Record<string, string>) => void;
   onCancel: () => void;
 }
 
@@ -24,14 +26,16 @@ export function V2Quiz({
   scoringQuestionSet,
   initialAnswers = [],
   initialAnswerTexts = {},
+  initialIndex = 0,
   answeredOffset = 0,
   modeLabel = 'Test gratuito · 14 preguntas · el Sombrero no adivina, calcula',
   onComplete,
+  onProgress,
   onCancel,
 }: V2QuizProps) {
   const activeQuestions = questions ?? QUICK_QUESTION_SET.questions;
   const activeScoringSet = scoringQuestionSet ?? QUICK_QUESTION_SET;
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(Math.min(Math.max(0, initialIndex), activeQuestions.length - 1));
   const [answers, setAnswers] = useState<AnswerRecord[]>(initialAnswers);
   const [answerTexts, setAnswerTexts] = useState<Record<string, string>>(initialAnswerTexts);
   const [optionId, setOptionId] = useState<string | null>(null);
@@ -94,9 +98,11 @@ export function V2Quiz({
       return;
     }
 
+    const nextIndex = index + 1;
     setAnswers(nextAnswers);
-    setIndex((current) => current + 1);
+    setIndex(nextIndex);
     resetDraft();
+    onProgress?.(nextIndex, nextAnswers, nextTexts);
     window.setTimeout(() => {
       committing.current = false;
     }, 250);
@@ -107,8 +113,10 @@ export function V2Quiz({
       onCancel();
       return;
     }
-    setIndex((current) => current - 1);
+    const nextIndex = index - 1;
+    setIndex(nextIndex);
     resetDraft();
+    onProgress?.(nextIndex, answers, answerTexts);
   };
 
   const handleForced = (option: QuickOption) => {

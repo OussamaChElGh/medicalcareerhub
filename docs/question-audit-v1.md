@@ -86,7 +86,7 @@ Resultado: las 51 especialidades entran en el top 5 con perfiles coherentes. La 
 - El desempate quirúrgico se mantiene entre Cirugía y Traumatología.
 - El test dirigido hacia cada especialidad mueve la ventaja en la dirección esperada.
 - La estabilidad del primer puesto en el test extensivo es del 97 % en la última simulación.
-- La estabilidad del test gratuito es del 76,2 %; se considera un cribado.
+- La estabilidad del test gratuito se mide ahora con el arnés determinista de 10 personas; ver el estado actualizado al final.
 
 ## Catálogo 51
 
@@ -116,8 +116,8 @@ Conclusión: con perfiles coherentes, las 51 son alcanzables. En perfiles ambigu
 
 ## Pendiente para la siguiente iteración
 
-1. Revisar los 39 perfiles nuevos con expertos y completar la evidencia de los valores ≥ 3.
-2. Afinar la estabilidad del test gratuito (77,3 %): es un cribado, no un ranking definitivo.
+1. Validación clínica formal de las 51 fichas, si se decide hacerla; la beta no la exige.
+2. Mantener y documentar la estabilidad del test gratuito con el arnés determinista; sigue siendo un cribado, no un ranking definitivo.
 3. Ajustar pesos con datos, no con intuición.
 4. Revisar si alguna pareja de especialidades sigue siendo indistinguible y necesita perfiles más diferenciados.
 5. Validar con estudiantes o residentes cuando sea posible.
@@ -132,3 +132,14 @@ Conclusión: con perfiles coherentes, las 51 son alcanzables. En perfiles ambigu
 - Alcanzabilidad coherente: 51/51 en top 5 y 51/51 en top 10.
 - Sin especialidad con ventaja estructural superior al 35 % en perfiles aleatorios.
 - Tiempo de realización inferior a 15 minutos.
+
+## Estado tras la revisión documental y el arnés de estabilidad
+
+- Evidencia numérica: 0 valores ≥3 sin justificación (82 huecos cerrados).
+- Estado del catálogo: 51 fichas en `draft`; sin validación clínica formal.
+- Arnés determinista: 10 personas, 14 preguntas, escenarios de cambio cercano y aleatorio.
+- Cambio cercano: top 1 80,7 %, top 3 86,0 %, top 5 87,6 %.
+- Cambio aleatorio: top 1 80,7 %, top 3 82,4 %, top 5 86,9 %.
+- Criterio de aceptación del gratuito: top 1 ≥80 %, top 3 ≥85 %, top 5 ≥85 % con cambio cercano; el escenario aleatorio se informa como prueba de estrés.
+- La persona ambigua sigue siendo inestable por diseño; el producto debe comunicar duelo/confianza baja, no una certeza que no existe.
+- Pendiente: firma de revisor clínico, evidencia específica de las restricciones laborales y validación con estudiantes/residentes.

@@ -136,7 +136,7 @@ function verifyFields(): void {
   console.log('=== Catálogo ===');
   console.log(`Fichas: ${ACTIVE_SPECIALTIES.length}`);
   console.log('Tipos:', typeCounts);
-  console.log('Estado de revisión:', reviewCounts);
+  console.log('Estado de ficha:', reviewCounts);
   console.log(`Fichas con población "all": ${withAllPopulation}`);
   if (missingEvidence > 0) {
     console.log(

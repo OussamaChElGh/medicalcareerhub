@@ -21,7 +21,7 @@ Comprobar si el banco de preguntas discrimina perfiles, si el resultado es compr
 
 ## Procedimiento
 
-1. Abrir `/?v2=1`.
+1. Abrir `/`.
 2. Completar el test gratuito.
 3. Revisar el resultado y valorar del 1 al 5:
    - claridad de las preguntas;

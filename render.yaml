@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: arcanum-medicum
+    runtime: node
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PREMIUM_TOKEN_SECRET
+        generateValue: true
+      - key: PREMIUM_PRICE_CENTS
+        value: "499"
+      - key: PREMIUM_CURRENCY
+        value: eur
+      - key: PREMIUM_PRODUCT_NAME
+        value: Informe vocacional Arcanum Medicum
+      - key: PREMIUM_DEV_UNLOCK
+        value: "false"

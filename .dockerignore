@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.gitignore
+.gitattributes
+*.log
+.dev-server.pid
+.dev-server.out.log
+.dev-server.err.log
+.env
+.env.*
+!.env.example
+coverage
