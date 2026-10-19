@@ -12,6 +12,13 @@ import { QUICK_QUESTION_SET } from "./src/data/questions.quick";
 import { ACTIVE_SPECIALTIES } from "./src/data/specialties";
 import { buildScoringQuestionSet, selectBranchQuestions } from "./src/lib/branching";
 import type { AnswerRecord, QuizResult } from "./src/types";
+import {
+  initTelemetry,
+  recordEvent,
+  getTelemetryStats,
+  resetTelemetry,
+  seedTelemetry,
+} from "./src/lib/telemetryStorage";
 
 dotenv.config();
 
@@ -94,7 +101,7 @@ async function startServer() {
 
   app.use(express.json());
 
-// Initialize Gemini client helper
+// Gemini client helper & quota protection
 const getGeminiClient = () => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
@@ -108,17 +115,81 @@ const getGeminiClient = () => {
   });
 };
 
+let geminiCooldownUntil = 0;
+let lastGeminiCallTime = 0;
+const MIN_GEMINI_CALL_INTERVAL_MS = 12000; // 12 seconds between calls to respect 5 RPM free tier
+
+const ARCANE_THOUGHT_ARCHIVE = [
+  '"Ese pulso tiembla más que un cirujano con Parkinson arcano... Patético."',
+  '"¿Anatomía? Veo que prefieres lo que yo llamo carnicería creativa."',
+  '"Huelo una sepsis moral en esa elección. Fascinante y asqueroso a la vez."',
+  '"Tus hilos vitales están más enredados que un historial de urgencias en plenilunio."',
+  '"Esa ética es tan frágil como un fémur con osteoporosis mágica. Se romperá pronto."',
+  '"Crees que el bisturí te dará poder... qué tierno delirio de grandeza quirúrgico."',
+  '"Tú no buscas curar, buscas aplausos. La medicina no es un teatro de variedades."',
+  '"He visto cadáveres con más voluntad de diagnóstico que tú."',
+  '"Esa respuesta indica una preocupante hipoxia intelectual... Necesitas aire, o cerebro."',
+  '"¿Compasión? Huelo que te has equivocado de academia. Aquí forjamos acero, no consuelos."',
+  '"Ese ego tiene el tamaño de una cardiomegalia terminal. No cabrás en el quirófano."',
+  '"Mmm, un complejo de Dios sin el poder de un Dios. Diagnóstico: Iluso."',
+  '"Tus neuronas están haciendo huelga o simplemente nunca fueron contratadas."',
+  '"Esa lógica tiene más agujeros que un colador en un campo de tiro arcano."',
+  '"Vaya, un experto en nada que opina sobre todo. Serás un administrativo excelente."',
+  '"Tu concepto de la vida es tan estrecho que cabe en un portaobjetos sucio."',
+  '"Huelo ambición... y un poco de sudor frío de incompetencia."',
+  '"¿Ética? En esta academia, la ética es solo la piel que cubre el músculo del progreso."',
+  '"Veo que prefieres los síntomas a las causas. Qué superficial... y qué humano."',
+  '"Esa mente es un desierto quirúrgico. No hay nada que salvar ahí."',
+  '"Interesante... si por interesante entiendes catástrofe médica inminente."',
+  '"Tu alma tiene el color de un pulmón de minero de carbón arcano. Oscura y pesada."',
+  '"¿Dolor? El dolor es solo información. Veo que tú prefieres ignorar los datos."',
+  '"Ese juicio está más nublado que una catarata post-mortem."',
+  '"Manejas los conceptos médicos como un orco maneja un violín: con violencia y sin talento."',
+  '"Bravo. Has logrado decepcionarme en menos de diez segundos. Un récord."',
+  '"Tu destino es tan incierto como un diagnóstico hecho por un estudiante de primer año."',
+  '"Siento un vacío en tu intelecto que ni el éter más puro podría llenar."',
+  '"Vaya, una respuesta que destila un aroma a no tengo ni idea. Sincero, al menos."',
+  '"¿Sangre? La sangre es solo el lubricante del destino. Tú pareces preferir el óxido."',
+  '"Doce preguntas y todavía crees que elegir especialidad es como elegir varita... Qué adorable."',
+  '"Tu perfil dice más de ti que tu expediente académico. Y eso ya es decir."',
+  '"Veo un patrón... y no precisamente uno de excelencia."',
+  '"Sigue respondiendo. Estoy empezando a divertirme con tu incertidumbre."',
+  '"Esa mezcla de intereses es tan coherente como un diagnóstico firmado por un becario."',
+  '"La vocación no se elige con un test. Pero tú sigue intentándolo, mortal."'
+];
+
+function getRandomArcaneThought(): string {
+  return ARCANE_THOUGHT_ARCHIVE[Math.floor(Math.random() * ARCANE_THOUGHT_ARCHIVE.length)];
+}
+
+function getProceduralJudgment(specialtyName: string, description: string): string {
+  const templates = [
+    `El veredicto de las costuras es inexorable: tu mente busca la forja de ${specialtyName}. No hay consuelo ni gloria fácil en este camino, solo la verdad implacable del oficio. ${description}`,
+    `He contemplado tus pulsiones y tus vacilaciones. Tu destino queda grabado en ${specialtyName}. Otros habrían temblado ante la incertidumbre; tus decisiones revelan el temple exacto que este sacerdocio exige.`,
+    `Ni el éter ni la casualidad te han traído aquí: perteneces a ${specialtyName}. Tu instinto no tolera la mediocridad clínica; prepárate para ser puesto a prueba hasta la última costura.`,
+    `Las cartas arcanas coinciden con tus reflejos: tu sitio indiscutible está en ${specialtyName}. Tienes la osadía necesaria para abrazar su rigor sin perder el juicio en el intento.`
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
   // --- API Routes ---
 
-  // Gemini: Hat Thought Generation
+  // Gemini: Hat Thought Generation with smart quota throttling & instant fallback
   app.post("/api/gemini/hat-thought", async (req, res) => {
-    try {
-      const { answersSoFar = [], currentQuestion = "", currentAnswer = "" } = req.body;
-      const ai = getGeminiClient();
-      if (!ai) {
-        return res.status(503).json({ error: "Gemini API key is not configured on the server." });
-      }
+    const { answersSoFar = [], currentQuestion = "", currentAnswer = "" } = req.body;
+    const now = Date.now();
 
+    // Check if in cooldown or throttling interval
+    if (now < geminiCooldownUntil || (now - lastGeminiCallTime < MIN_GEMINI_CALL_INTERVAL_MS)) {
+      return res.json({ thought: getRandomArcaneThought(), fallback: true });
+    }
+
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.json({ thought: getRandomArcaneThought(), fallback: true });
+    }
+
+    try {
       const prompt = `Eres un "Sombrero Seleccionador" consciente en una academia de medicina arcana. 
 Tu estilo es místico, sabio y profundamente MORDAZ. Tienes un humor ácido y no temes juzgar la fragilidad, la arrogancia o la ignorancia humana. 
 Eres como un viejo erudito que ha visto milenios de aprendices mediocres y buscas la chispa de la verdadera esencia.
@@ -134,28 +205,41 @@ Sé original, cínico, clínico y místico. Evita los clichés.
 Ejemplos de tono: "Esa obsesión con el detalle sugiere una mente quirúrgica, o quizás simplemente un desorden obsesivo que me obligará a limpiarme las costuras...", "Vaya, un héroe en potencia. Huelo el aroma a martirio y a horas extras sin pagar en un hospital de campaña... qué aburrido.".
 No menciones "Harry Potter". Solo devuelve la frase entre comillas.`;
 
+      lastGeminiCallTime = now;
       const response = await ai.models.generateContent({
         model: "gemini-3.8-flash",
         contents: prompt,
       });
 
-      const thought = response.text?.trim() || '"Tu mente es un laberinto... uno bastante aburrido."';
+      const thought = response.text?.trim() || getRandomArcaneThought();
       res.json({ thought });
     } catch (error: any) {
-      console.warn("Gemini server error (hat-thought):", error?.message || error);
-      res.status(error?.status || 500).json({ error: error?.message || "Gemini service temporarily unavailable" });
+      const errMsg = String(error?.message || error || "");
+      if (errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED") || errMsg.includes("quota")) {
+        geminiCooldownUntil = Date.now() + 60000;
+        console.log("[Arcane Engine] Free tier rate limit reached. Activating arcane archive fallback for 60s.");
+      } else {
+        console.log("[Arcane Engine] Gemini response fallback activated.");
+      }
+      res.json({ thought: getRandomArcaneThought(), fallback: true });
     }
   });
 
-  // Gemini: Final Judgment Generation
+  // Gemini: Final Judgment Generation with graceful quota resilience
   app.post("/api/gemini/final-judgment", async (req, res) => {
-    try {
-      const { specialtyName = "", description = "", answers = [] } = req.body;
-      const ai = getGeminiClient();
-      if (!ai) {
-        return res.status(503).json({ error: "Gemini API key is not configured on the server." });
-      }
+    const { specialtyName = "", description = "", answers = [] } = req.body;
+    const now = Date.now();
 
+    if (now < geminiCooldownUntil) {
+      return res.json({ judgment: getProceduralJudgment(specialtyName, description), fallback: true });
+    }
+
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.json({ judgment: getProceduralJudgment(specialtyName, description), fallback: true });
+    }
+
+    try {
       const prompt = `Eres el "Sombrero Seleccionador" de la Academia Arcanum Medicum.
 Has evaluado a un aprendiz y has determinado que su destino es: ${specialtyName}.
 Contexto de la especialidad: ${description}
@@ -167,19 +251,138 @@ Explica por qué has elegido este destino (¿por su frialdad? ¿por su pulsión 
 No uses lenguaje clínico moderno. Usa metáforas de academia arcana (la forja de la carne, el baile con la muerte, el susurro de los nervios).
 No menciones "Harry Potter".`;
 
+      lastGeminiCallTime = now;
       const response = await ai.models.generateContent({
         model: "gemini-3.8-flash",
         contents: prompt,
       });
 
-      const judgment = response.text?.trim() || description;
+      const judgment = response.text?.trim() || getProceduralJudgment(specialtyName, description);
       res.json({ judgment });
     } catch (error: any) {
-      console.warn("Gemini server error (final-judgment):", error?.message || error);
-      res.status(error?.status || 500).json({ error: error?.message || "Gemini service temporarily unavailable" });
+      const errMsg = String(error?.message || error || "");
+      if (errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED") || errMsg.includes("quota")) {
+        geminiCooldownUntil = Date.now() + 60000;
+        console.log("[Arcane Engine] Rate limit on judgment. Delivered procedural arcane decree.");
+      } else {
+        console.log("[Arcane Engine] Serving high-lore decree fallback.");
+      }
+      res.json({ judgment: getProceduralJudgment(specialtyName, description), fallback: true });
     }
   });
 
+
+  initTelemetry();
+
+  // --- Telemetry & Backoffice Funnel API ---
+  app.post("/api/telemetry/event", (req, res) => {
+    try {
+      const {
+        type,
+        visitorId,
+        page,
+        mode,
+        specialtyId,
+        specialtyName,
+        house,
+        durationSeconds,
+        actionDetail,
+        device,
+      } = req.body || {};
+
+      if (!type || !visitorId) {
+        return res.status(400).json({ error: "Faltan campos requeridos (type, visitorId)." });
+      }
+
+      const event = recordEvent({
+        type,
+        visitorId,
+        page,
+        mode,
+        specialtyId,
+        specialtyName,
+        house,
+        durationSeconds,
+        actionDetail,
+        device,
+      });
+
+      res.json({ ok: true, eventId: event.id });
+    } catch (err: any) {
+      console.error("[Telemetry] Error recording event:", err);
+      res.status(500).json({ error: "Error al registrar evento." });
+    }
+  });
+
+  app.get("/api/telemetry/stats", (req, res) => {
+    try {
+      const period = req.query.period as any;
+      const stats = getTelemetryStats(period || "all");
+      res.json(stats);
+    } catch (err: any) {
+      console.error("[Telemetry] Error getting stats:", err);
+      res.status(500).json({ error: "Error al consultar estadísticas." });
+    }
+  });
+
+  app.post("/api/telemetry/reset", (_req, res) => {
+    try {
+      resetTelemetry();
+      res.json({ ok: true, message: "Datos de telemetría reiniciados con éxito." });
+    } catch (err: any) {
+      console.error("[Telemetry] Error resetting stats:", err);
+      res.status(500).json({ error: "Error al reiniciar estadísticas." });
+    }
+  });
+
+  app.post("/api/telemetry/seed", (req, res) => {
+    try {
+      const { visits, starts, completions, retentions } = req.body || {};
+      seedTelemetry(
+        Number(visits) || 100,
+        Number(starts) || 40,
+        Number(completions) || 30,
+        Number(retentions) || 18,
+      );
+      res.json({ ok: true, message: "Datos de ejemplo sembrados con éxito." });
+    } catch (err: any) {
+      console.error("[Telemetry] Error seeding stats:", err);
+      res.status(500).json({ error: "Error al sembrar datos." });
+    }
+  });
+
+  app.get("/api/telemetry/export", (req, res) => {
+    try {
+      const stats = getTelemetryStats("all");
+      const format = req.query.format === "csv" ? "csv" : "json";
+      if (format === "json") {
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Content-Disposition", 'attachment; filename="censo_telemetria_backoffice.json"');
+        return res.json(stats);
+      } else {
+        const headers = ["ID", "Tipo", "Fecha/Hora", "Visitante", "Página/Modalidad", "Especialidad", "Casa", "Duración (seg)", "Acción Detalle", "Dispositivo"];
+        const rows = stats.recentEvents.map(e => [
+          e.id,
+          e.type,
+          e.timestamp,
+          e.visitorId,
+          e.mode || e.page || '',
+          e.specialtyName || '',
+          e.house || '',
+          e.durationSeconds ?? '',
+          e.actionDetail || '',
+          e.device || 'desktop'
+        ]);
+        const csvContent = [headers.join(','), ...rows.map(r => r.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))].join('\n');
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader("Content-Disposition", 'attachment; filename="censo_telemetria_eventos.csv"');
+        return res.send(csvContent);
+      }
+    } catch (err: any) {
+      console.error("[Telemetry] Error exporting stats:", err);
+      res.status(500).json({ error: "Error al exportar datos." });
+    }
+  });
 
   app.get("/api/health", (_req, res) => {
     res.json({

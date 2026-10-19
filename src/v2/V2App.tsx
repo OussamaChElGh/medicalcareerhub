@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, TrendingUp } from 'lucide-react';
 import { AtmosphericFrame } from '../components/AtmosphericFrame';
 import { OracleView } from '../components/OracleView';
 import { SortingHat } from '../components/SortingHat';
@@ -12,6 +12,7 @@ import {
   selectBranchQuestions,
 } from '../lib/branching';
 import { getFinalJudgment } from '../lib/gemini';
+import { deriveHouse } from '../lib/narrative';
 import {
   downloadBlob,
   downloadPremiumPdf,
@@ -21,6 +22,7 @@ import {
   savePremiumAccess,
   startPremiumCheckout,
   verifyPremiumSession,
+  devUnlockPremium,
 } from '../lib/premium';
 import {
   clearPilotSessions,
@@ -39,12 +41,15 @@ import {
 } from '../lib/v2Session';
 import { AnswerRecord, QuestionSet, QuickQuestion, QuizResult } from '../types';
 import { V2About } from './V2About';
+import { V2Backoffice } from './V2Backoffice';
 import { V2Blog } from './V2Blog';
 import { V2Catalog } from './V2Catalog';
+import { V2ModeSelectionModal } from './V2ModeSelectionModal';
 import { V2Navbar, V2NavScene } from './V2Navbar';
 import { V2PremiumModal } from './V2PremiumModal';
 import { V2Quiz } from './V2Quiz';
 import { V2Result } from './V2Result';
+import { sendTelemetryEvent } from '../lib/useTelemetry';
 
 type Stage =
   | 'intro'
@@ -55,7 +60,8 @@ type Stage =
   | 'blog'
   | 'about'
   | 'stats'
-  | 'oracle';
+  | 'oracle'
+  | 'backoffice';
 
 type ResultMode = 'free' | 'extensive';
 
@@ -127,6 +133,7 @@ const STAGE_PARAMS: Record<string, Stage> = {
   about: 'about',
   stats: 'stats',
   oracle: 'oracle',
+  backoffice: 'backoffice',
 };
 
 function isV2NavScene(stage: Stage): stage is V2NavScene {
@@ -137,12 +144,15 @@ function isV2NavScene(stage: Stage): stage is V2NavScene {
     'stats',
     'oracle',
     'about',
+    'backoffice',
     'result',
   ].includes(stage);
 }
 
 export function V2App() {
   const params = new URLSearchParams(window.location.search);
+  const path = typeof window !== 'undefined' ? window.location.pathname.replace(/\/+$/, '') : '';
+  const isBackofficeRoute = path === '/backoffice' || params.get('tab') === 'backoffice';
   const isResultDemo = params.get('demo') === 'result';
   const isExtensiveDemo = params.get('demo') === 'extensive';
   const isDemo = isResultDemo || isExtensiveDemo;
@@ -153,12 +163,14 @@ export function V2App() {
     isDemo || stageParam ? null : loadV2Session(),
   );
 
-  const initialStage: Stage = isResultDemo
-    ? 'result'
-    : isExtensiveDemo
-      ? 'extensive'
-      : STAGE_PARAMS[stageParam] ??
-        (savedSession?.stage === 'result' && savedSession.result ? 'result' : 'intro');
+  const initialStage: Stage = isBackofficeRoute
+    ? 'backoffice'
+    : isResultDemo
+      ? 'result'
+      : isExtensiveDemo
+        ? 'extensive'
+        : STAGE_PARAMS[stageParam] ??
+          (savedSession?.stage === 'result' && savedSession.result ? 'result' : 'intro');
 
   const demoBranch = isExtensiveDemo && demoResult ? selectBranchQuestions(demoResult) : null;
   const demoExtensiveConfig: ExtensiveConfig | null = demoBranch
@@ -228,6 +240,7 @@ export function V2App() {
   );
   const [premiumConfig, setPremiumConfig] = useState<PremiumConfig>(DEFAULT_PREMIUM_CONFIG);
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+  const [modeModalOpen, setModeModalOpen] = useState(false);
   const [premiumLoading, setPremiumLoading] = useState(false);
   const [premiumDownloading, setPremiumDownloading] = useState(false);
   const [premiumError, setPremiumError] = useState<string | null>(null);
@@ -255,6 +268,7 @@ export function V2App() {
     setJudgment('');
     setReportId('');
     setPremiumModalOpen(false);
+    setModeModalOpen(false);
     setPremiumError(null);
   };
 
@@ -265,9 +279,50 @@ export function V2App() {
     reset();
     setReportId(createReportId());
     setQuizStartedAt(Date.now());
+    sendTelemetryEvent({ type: 'test_start', mode: 'free' });
     setStage('quiz');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const handleSelectPremiumFromStart = async () => {
+    sessionEpoch.current += 1;
+    clearV2Session();
+    setShowResume(false);
+    reset();
+    const newReportId = createReportId();
+    setReportId(newReportId);
+    setQuizStartedAt(Date.now());
+    sendTelemetryEvent({ type: 'test_start', mode: 'free' });
+
+    if (premiumConfig.devUnlock) {
+      try {
+        const access = await devUnlockPremium(newReportId, 'free');
+        setPremiumAccess(access);
+      } catch {
+        // proceed
+      }
+      setStage('quiz');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (premiumConfig.configured) {
+      setStage('quiz');
+      setPremiumModalOpen(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      try {
+        const access = await devUnlockPremium(newReportId, 'free');
+        setPremiumAccess(access);
+      } catch {
+        // proceed
+      }
+      setStage('quiz');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Track page views when user changes stage
+  useEffect(() => {
+    sendTelemetryEvent({ type: 'page_view', page: stage });
+  }, [stage]);
 
   const home = () => {
     sessionEpoch.current += 1;
@@ -341,6 +396,7 @@ export function V2App() {
     answerTexts: Record<string, string>,
   ) => {
     const durationMs = quizStartedAt ? Date.now() - quizStartedAt : 0;
+    const durationSeconds = Math.max(10, Math.round(durationMs / 1000)) || 180;
     savePilotSession(createPilotSession(nextResult, answers, 'free', durationMs));
     setPilotCount(loadPilotSessions().length);
 
@@ -356,6 +412,18 @@ export function V2App() {
     setJudgment('');
     setStage('result');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Step 3 Telemetry Event: Test Completed
+    const first = nextResult.top[0];
+    const { house } = deriveHouse(nextResult.profile);
+    sendTelemetryEvent({
+      type: 'test_complete',
+      mode: 'free',
+      specialtyId: first?.specialty.id,
+      specialtyName: first?.specialty.name,
+      house,
+      durationSeconds,
+    });
 
     const epoch = sessionEpoch.current;
 
@@ -374,7 +442,6 @@ export function V2App() {
       judgment: '',
     });
 
-    const first = nextResult.top[0];
     if (first) {
       getFinalJudgment(
         first.specialty.name,
@@ -393,6 +460,7 @@ export function V2App() {
 
     sessionEpoch.current += 1;
     setQuizStartedAt(Date.now());
+    sendTelemetryEvent({ type: 'test_start', mode: 'extensive' });
     const branchQuestions = selectBranchQuestions(freeResult);
     setExtensiveConfig({
       displayQuestions: getExtensiveDisplayQuestions(branchQuestions),
@@ -427,6 +495,7 @@ export function V2App() {
     answerTexts: Record<string, string>,
   ) => {
     const durationMs = quizStartedAt ? Date.now() - quizStartedAt : 0;
+    const durationSeconds = Math.max(10, Math.round(durationMs / 1000)) || 240;
     savePilotSession(createPilotSession(nextResult, answers, 'extensive', durationMs));
     setPilotCount(loadPilotSessions().length);
 
@@ -439,6 +508,18 @@ export function V2App() {
     setJudgment('');
     setStage('result');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Step 3 Telemetry Event: Test Extensive Completed
+    const first = nextResult.top[0];
+    const { house } = deriveHouse(nextResult.profile);
+    sendTelemetryEvent({
+      type: 'test_complete',
+      mode: 'extensive',
+      specialtyId: first?.specialty.id,
+      specialtyName: first?.specialty.name,
+      house,
+      durationSeconds,
+    });
 
     const epoch = sessionEpoch.current;
 
@@ -453,7 +534,6 @@ export function V2App() {
       judgment: '',
     });
 
-    const first = nextResult.top[0];
     if (first) {
       getFinalJudgment(
         first.specialty.name,
@@ -574,6 +654,13 @@ export function V2App() {
         resultMode as PremiumMode,
       );
       downloadBlob(blob, `Arcanum_Informe_${reportId.slice(0, 8)}.pdf`);
+      sendTelemetryEvent({
+        type: 'retention_action',
+        actionDetail: 'download_pdf',
+        specialtyName: result?.ranking[0]?.specialty.name,
+        house: result ? deriveHouse(result.profile).house : undefined,
+        mode: resultMode,
+      });
     } catch (error: any) {
       setPremiumError(error?.message || 'No se pudo generar el PDF.');
     } finally {
@@ -622,6 +709,15 @@ export function V2App() {
           </div>
         </div>
       )}
+
+      <V2ModeSelectionModal
+        open={modeModalOpen}
+        priceLabel={premiumPriceLabel}
+        paymentConfigured={premiumPaymentConfigured}
+        onClose={() => setModeModalOpen(false)}
+        onSelectFree={start}
+        onSelectPremium={handleSelectPremiumFromStart}
+      />
 
       <V2PremiumModal
         open={premiumModalOpen}
@@ -678,7 +774,7 @@ export function V2App() {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={start}
+                onClick={() => setModeModalOpen(true)}
                 className="group relative mx-auto block overflow-hidden px-10 py-5"
               >
                 <div className="absolute inset-0 border border-gold/30 bg-gold/5 backdrop-blur-md transition-colors duration-500 group-hover:border-gold" />
@@ -703,16 +799,25 @@ export function V2App() {
               </div>
             </motion.div>
 
-            <footer className="mt-auto flex w-full max-w-4xl items-center justify-between gap-6 px-4 pt-12">
+            <footer className="mt-auto flex w-full max-w-4xl flex-wrap items-center justify-between gap-6 px-4 pt-12">
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] uppercase tracking-[0.2em] text-medical-teal sm:text-xs">
                   Esperando Aspirante
                 </span>
                 <div className="h-[2px] w-32 bg-medical-teal/10 sm:w-48" />
               </div>
-              <span className="font-mono text-[9px] uppercase tracking-widest text-medical-teal/40">
-                V2 · 51 especialidades activas
-              </span>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate('backoffice')}
+                  className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-gold/70 hover:text-gold transition-colors cursor-pointer"
+                >
+                  <TrendingUp size={12} className="text-gold" />
+                  <span>Backoffice de Telemetría</span>
+                </button>
+                <span className="font-mono text-[9px] uppercase tracking-widest text-medical-teal/40">
+                  V2 · 51 especialidades activas
+                </span>
+              </div>
             </footer>
           </main>
         )}
@@ -800,12 +905,20 @@ export function V2App() {
 
         {stage === 'catalog' && (
           <main className="flex flex-1 items-start justify-center">
-            <V2Catalog onBack={() => navigate('intro')} />
+            <V2Catalog
+              onBack={() => navigate('intro')}
+              onStartTest={() => setModeModalOpen(true)}
+            />
           </main>
         )}
 
         {stage === 'blog' && <V2Blog />}
-        {stage === 'about' && <V2About onOpenCatalog={() => navigate('catalog')} />}
+        {stage === 'about' && (
+          <V2About
+            onOpenCatalog={() => navigate('catalog')}
+            onStartTest={() => setModeModalOpen(true)}
+          />
+        )}
         {stage === 'stats' && (
           <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
             <StatsView />
@@ -814,6 +927,11 @@ export function V2App() {
         {stage === 'oracle' && (
           <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
             <OracleView />
+          </main>
+        )}
+        {stage === 'backoffice' && (
+          <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
+            <V2Backoffice onBack={() => navigate('intro')} />
           </main>
         )}
       </div>

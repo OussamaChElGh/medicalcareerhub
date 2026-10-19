@@ -67,11 +67,17 @@ export function V2Quiz({
 
   const reactWithHat = (summary: string) => {
     const previous = Object.values(answerTexts) as string[];
+    const instant = getLocalHatThought(usedThoughts);
+    setHatThought(instant);
+    setUsedThoughts((current) => [...current, instant]);
+
     setHatThinking(true);
     getHatThought(previous, question.prompt, summary, usedThoughts)
       .then((thought) => {
-        setHatThought(thought);
-        setUsedThoughts((current) => [...current, thought]);
+        if (thought && thought !== instant) {
+          setHatThought(thought);
+          setUsedThoughts((current) => [...current, thought]);
+        }
       })
       .finally(() => setHatThinking(false));
   };
@@ -122,6 +128,54 @@ export function V2Quiz({
   const handleForced = (option: QuickOption) => {
     setOptionId(option.id);
     commit({ questionId: question.id, optionId: option.id }, option.text);
+  };
+
+  const handleRateOption = (optionId: string, rating: number) => {
+    setError(null);
+    setValues((prev) => ({
+      ...prev,
+      [optionId]: rating,
+    }));
+  };
+
+  const fillRemainingWithNeutral = () => {
+    const next = { ...values };
+    (question.options ?? []).forEach((opt) => {
+      if (typeof next[opt.id] !== 'number') {
+        next[opt.id] = 3;
+      }
+    });
+    setValues(next);
+  };
+
+  const submitRatedForced = () => {
+    const options = question.options ?? [];
+    const missing = options.filter((opt) => typeof values[opt.id] !== 'number');
+    if (missing.length > 0) {
+      setError(`Valora las ${missing.length} opciones restantes de 1 a 5 (o pulsa "Poner 3 a restantes").`);
+      return;
+    }
+
+    const ratedValues: Record<string, number> = {};
+    options.forEach((opt) => {
+      ratedValues[opt.id] = (values[opt.id] as number) ?? 3;
+    });
+
+    const topRated = [...options].sort(
+      (a, b) => (ratedValues[b.id] ?? 0) - (ratedValues[a.id] ?? 0),
+    )[0];
+
+    const summary = topRated
+      ? `Mayor afinidad: ${topRated.text} (${ratedValues[topRated.id]}/5)`
+      : 'Opciones evaluadas de 1 a 5';
+
+    commit(
+      {
+        questionId: question.id,
+        values: ratedValues,
+      },
+      summary,
+    );
   };
 
   const handleMulti = (option: QuickOption) => {
@@ -196,27 +250,115 @@ export function V2Quiz({
     commit({ questionId: question.id, values: values as Record<string, number | null> }, summary);
   };
 
-  const renderForced = () => (
-    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-      {(question.options ?? []).map((option) => (
-        <button
-          key={option.id}
-          onClick={() => handleForced(option)}
-          className={`group flex items-center justify-between gap-4 border p-4 text-left transition-all sm:p-5 ${
-            optionId === option.id
-              ? 'border-gold bg-gold/20 text-gold'
-              : 'border-gold/30 bg-gold/5 text-parchment hover:border-gold hover:bg-gold/20'
-          }`}
-        >
-          <span className="font-magic text-sm leading-snug sm:text-lg">{option.text}</span>
-          <ArrowRight
-            size={16}
-            className="flex-shrink-0 text-gold/50 transition-transform group-hover:translate-x-1 group-hover:text-gold"
-          />
-        </button>
-      ))}
-    </div>
-  );
+  const renderForced = () => {
+    const options = question.options ?? [];
+    const ratedCount = options.filter((opt) => typeof values[opt.id] === 'number').length;
+
+    return (
+      <div className="space-y-4">
+        {/* Rating Instructions & Progress Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gold/15 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold/20 text-gold text-[10px] font-bold">
+              ★
+            </span>
+            <span className="font-mono text-xs uppercase tracking-wider text-parchment font-semibold">
+              Puntúa cada opción de 1 a 5 según tu afinidad
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-xs">
+            <span className="font-mono text-[11px] text-parchment/70">
+              Progreso: <strong className="text-gold">{ratedCount}</strong>/{options.length} valoradas
+            </span>
+            {ratedCount < options.length && (
+              <button
+                type="button"
+                onClick={fillRemainingWithNeutral}
+                className="text-[10px] text-medical-teal hover:underline font-semibold"
+              >
+                Poner 3 a restantes
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* List of Options with 1-5 Ratings */}
+        <div className="space-y-3">
+          {options.map((option, idx) => {
+            const currentRating = values[option.id];
+            const isRated = typeof currentRating === 'number';
+
+            return (
+              <div
+                key={option.id}
+                className={`group rounded-xl border p-4 sm:p-5 transition-all duration-200 ${
+                  isRated
+                    ? 'border-gold/50 bg-[#0c1524]/90 shadow-md ring-1 ring-gold/20'
+                    : 'border-gold/20 bg-[#080f19]/80 hover:border-gold/40'
+                }`}
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-3 flex-1">
+                    <span className="font-mono text-xs font-bold text-gold/70 bg-gold/10 border border-gold/30 rounded-md h-6 w-6 flex items-center justify-center shrink-0 mt-0.5">
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    <p className="font-magic text-sm sm:text-base leading-snug text-[#f7eedc] group-hover:text-gold transition-colors">
+                      {option.text}
+                    </p>
+                  </div>
+
+                  {/* 1-5 Rating Scale */}
+                  <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gold/10 w-full sm:w-auto justify-between sm:justify-end">
+                    <span className="text-[10px] uppercase font-mono tracking-wider text-parchment/60 sm:hidden">
+                      Afinidad:
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {[1, 2, 3, 4, 5].map((val) => {
+                        const isValSelected = currentRating === val;
+                        const ratingLabels = ['1: Nada', '2: Poco', '3: Neutro', '4: Bastante', '5: Total'];
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => handleRateOption(option.id, val)}
+                            title={ratingLabels[val - 1]}
+                            className={`h-9 w-9 sm:h-10 sm:w-10 rounded-lg border font-mono text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                              isValSelected
+                                ? 'border-gold bg-gradient-to-b from-gold to-amber-600 text-bg-deep shadow-[0_0_15px_rgba(217,119,6,0.6)] scale-105'
+                                : 'border-gold/20 bg-black/40 text-parchment/70 hover:border-gold/50 hover:bg-gold/10 hover:text-gold'
+                            }`}
+                          >
+                            {val}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {isRated && (
+                  <div className="mt-2 text-right text-[10px] font-mono font-medium text-gold-light/90">
+                    {currentRating === 1 && '1/5 — Mínima afinidad / No me identifico'}
+                    {currentRating === 2 && '2/5 — Baja afinidad / Raramente'}
+                    {currentRating === 3 && '3/5 — Afinidad moderada / Neutral'}
+                    {currentRating === 4 && '4/5 — Alta afinidad / Me atrae'}
+                    {currentRating === 5 && '5/5 — Máxima afinidad / Me define completamente'}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Scale Legend */}
+        <div className="flex flex-wrap items-center justify-between text-[10px] font-mono text-parchment/50 px-1 pt-1">
+          <span>1 = Mínima afinidad</span>
+          <span>3 = Interés moderado</span>
+          <span>5 = Máxima prioridad</span>
+        </div>
+      </div>
+    );
+  };
 
   const renderMaxdiff = () => (
     <div className="space-y-3">
@@ -394,7 +536,7 @@ export function V2Quiz({
                 <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-3 py-1 text-[9px] uppercase tracking-[0.25em] text-gold">
                   <Sparkles size={11} />
                   {question.kind === 'forced'
-                    ? 'Elección'
+                    ? 'Valoración de Opciones (1 a 5)'
                     : question.kind === 'maxdiff'
                       ? 'Contraste'
                       : question.kind === 'multi'
@@ -416,23 +558,23 @@ export function V2Quiz({
 
               {error && <p className="text-xs italic text-rose-300">{error}</p>}
 
-              {question.kind !== 'forced' && (
-                <div className="flex justify-end border-t border-gold/10 pt-4">
-                  <button
-                    onClick={
-                      question.kind === 'maxdiff'
+              <div className="flex justify-end border-t border-gold/10 pt-4">
+                <button
+                  onClick={
+                    question.kind === 'forced'
+                      ? submitRatedForced
+                      : question.kind === 'maxdiff'
                         ? submitMaxdiff
                         : question.kind === 'multi'
                           ? submitMulti
                           : submitRatings
-                    }
-                    className="inline-flex items-center gap-2 rounded-sm border border-gold/60 bg-gold/15 px-6 py-3 text-xs font-bold uppercase tracking-widest text-gold transition-all hover:bg-gold/25"
-                  >
-                    Continuar
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              )}
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl border border-gold/60 bg-gradient-to-r from-gold/30 via-gold/40 to-gold/30 px-6 py-3 text-xs font-bold uppercase tracking-widest text-parchment shadow-[0_0_20px_rgba(217,119,6,0.3)] transition-all hover:bg-gold/40 hover:text-white cursor-pointer"
+                >
+                  Continuar Juicio
+                  <ArrowRight size={14} />
+                </button>
+              </div>
             </motion.div>
           </AnimatePresence>
 

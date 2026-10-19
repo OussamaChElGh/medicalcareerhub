@@ -56,13 +56,23 @@ export function getLocalHatThought(exclude: string[] = []): string {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+let lastClientHatThoughtTime = 0;
+const CLIENT_HAT_THROTTLE_MS = 14000; // 14s throttle to protect Gemini free tier quota
+
 export async function getHatThought(
   answersSoFar: string[],
   currentQuestion: string,
   currentAnswer: string,
   exclude: string[] = []
 ): Promise<string> {
+  const now = Date.now();
+  // If answered rapidly in succession, serve local arcane thought immediately (0ms latency, 0 quota used)
+  if (now - lastClientHatThoughtTime < CLIENT_HAT_THROTTLE_MS) {
+    return getLocalHatThought(exclude);
+  }
+
   try {
+    lastClientHatThoughtTime = now;
     const response = await fetchWithTimeout('/api/gemini/hat-thought', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -75,8 +85,8 @@ export async function getHatThought(
         return data.thought;
       }
     }
-  } catch (error: any) {
-    console.warn("Using local arcane thought fallback:", error?.message || error);
+  } catch (_err) {
+    // Silent fallback to local thought bank
   }
 
   return getLocalHatThought(exclude);
@@ -92,7 +102,7 @@ export async function getFinalJudgment(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ specialtyName, description, answers }),
-    });
+    }, 8000);
 
     if (response.ok) {
       const data = await response.json();
@@ -100,8 +110,8 @@ export async function getFinalJudgment(
         return data.judgment;
       }
     }
-  } catch (error: any) {
-    console.warn("Using local arcane judgment fallback:", error?.message || error);
+  } catch (_err) {
+    // Silent fallback to high-lore decree
   }
 
   return `Incluso un ciego vería que tu lugar es en ${specialtyName}. Tu esencia no deja lugar a dudas: ${description}`;

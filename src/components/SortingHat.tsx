@@ -90,11 +90,29 @@ export const SortingHat: React.FC<SortingHatProps> = ({ thinking, compact }) => 
             className="w-full h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,1)]"
           />
         ) : (
-          /* FALLBACK SVG - If the local image is not uploaded yet */
-          <svg viewBox="0 0 400 400" className="w-full h-full opacity-60 filter grayscale">
-             <path d="M200 40L300 300H100L200 40Z" fill="#3e2723" />
-             <path d="M50 300C50 300 50 340 200 340C350 340 350 300 350 300Z" fill="#2b1d14" />
-             <text x="50%" y="65%" textAnchor="middle" fill="#888" fontSize="12" className="italic font-sans">Sube tu imagen a /public/magic-sorting-hat.png</text>
+          /* FALLBACK SVG - Elegant gothic arcane hat silhouette */
+          <svg viewBox="0 0 400 400" className="w-full h-full filter drop-shadow-[0_15px_35px_rgba(0,0,0,0.9)]">
+             <defs>
+               <radialGradient id="hatGlow" cx="50%" cy="50%" r="50%">
+                 <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.3"/>
+                 <stop offset="100%" stopColor="#14b8a6" stopOpacity="0"/>
+               </radialGradient>
+               <linearGradient id="hatGrad" x1="0" y1="0" x2="0" y2="1">
+                 <stop offset="0%" stopColor="#3d2817"/>
+                 <stop offset="50%" stopColor="#24150c"/>
+                 <stop offset="100%" stopColor="#150c07"/>
+               </linearGradient>
+             </defs>
+             <circle cx="200" cy="200" r="160" fill="url(#hatGlow)" />
+             {/* Brim */}
+             <path d="M40 310 C80 280, 160 300, 200 300 C240 300, 320 280, 360 310 C340 345, 260 355, 200 355 C140 355, 60 345, 40 310 Z" fill="#1f120a" stroke="#c5a059" strokeWidth="2" strokeOpacity="0.4" />
+             {/* Cone */}
+             <path d="M120 295 C130 220, 150 160, 175 110 C185 85, 210 50, 240 35 C230 75, 245 95, 235 130 C225 170, 255 230, 280 295 C230 305, 170 305, 120 295 Z" fill="url(#hatGrad)" stroke="#c5a059" strokeWidth="2" strokeOpacity="0.4" />
+             {/* Folds & Grimace */}
+             <path d="M155 190 Q200 210 245 190" stroke="#0e0704" strokeWidth="6" strokeLinecap="round" fill="none" />
+             <path d="M165 240 Q200 270 235 240" stroke="#0e0704" strokeWidth="7" strokeLinecap="round" fill="none" />
+             {/* Arcane Rune Glyphs */}
+             <path d="M185 140 L200 125 L215 140 M200 125 L200 155" stroke="#14b8a6" strokeWidth="2" strokeOpacity="0.7" fill="none" />
           </svg>
         )}
         

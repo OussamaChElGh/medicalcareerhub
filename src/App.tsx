@@ -10,6 +10,9 @@ import { QUICK_QUESTIONS, EXTENSIVE_QUESTIONS, SPECIALTIES_MAP, BLOG_POSTS } fro
 import { Scene, Specialty, Option, QuizType, BlogPost } from './types';
 import { getHatThought, getFinalJudgment } from './lib/gemini';
 import { generateDossierPDF } from './lib/dossierPdf';
+import { DimensionsRadarChart } from './components/DimensionsRadarChart';
+import { HouseHeroBanner } from './components/HouseHeroBanner';
+import { PremiumHookCard } from './components/PremiumHookCard';
 import { Stethoscope, ArrowRight, Sparkles, Wand2, FlaskConical, BookOpen, ScrollText, CheckCircle2, Circle, Zap, Crown, Newspaper, Calendar, User, ArrowLeft, FileDown, Check } from 'lucide-react';
 
 export default function App() {
@@ -24,7 +27,8 @@ export default function App() {
   const [result, setResult] = useState<Specialty | null>(null);
   const [personalizedJudgment, setPersonalizedJudgment] = useState<string>("");
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
-
+  const [optionRatings, setOptionRatings] = useState<Record<string, number>>({});
+  const [alignmentWeights, setAlignmentWeights] = useState<Record<string, number>>({});
 
   const activeQuestions = useMemo(() => {
     return quizType === 'EXTENSIVE' ? EXTENSIVE_QUESTIONS : QUICK_QUESTIONS;
@@ -42,6 +46,8 @@ export default function App() {
     setQuizType(type);
     setCurrentQuestionIdx(0);
     setAnswers([]);
+    setOptionRatings({});
+    setAlignmentWeights({});
     setUsedThoughts([]);
     setResult(null);
     setScene('QUIZ');
@@ -73,27 +79,39 @@ export default function App() {
     }
   };
 
-  const handleOptionSelect = async (option: Option) => {
-    if (isThinking) return;
+  const handleClassicOptionRate = (optionId: string, rating: number) => {
+    setOptionRatings(prev => ({
+      ...prev,
+      [optionId]: rating,
+    }));
+  };
 
-    const newAnswers = [...answers, option.alignment];
+  const handleClassicConfirm = async () => {
+    if (isThinking || !currentQuestion) return;
+
+    // Weight alignments according to 1-5 ratings for all options
+    const nextWeights = { ...alignmentWeights };
+    currentQuestion.options.forEach((opt) => {
+      const rating = optionRatings[opt.id] ?? 3;
+      nextWeights[opt.alignment] = (nextWeights[opt.alignment] || 0) + rating;
+    });
+    setAlignmentWeights(nextWeights);
+
+    const topOption = [...currentQuestion.options].sort(
+      (a, b) => (optionRatings[b.id] ?? 3) - (optionRatings[a.id] ?? 3)
+    )[0];
+    const newAnswers = [...answers, topOption.alignment];
     setAnswers(newAnswers);
 
-    const calculateResultInternal = (finalAnswers: string[]) => {
-      const counts: Record<string, number> = {};
-      finalAnswers.forEach(ans => {
-        counts[ans] = (counts[ans] || 0) + 1;
-      });
-
+    const calculateResultInternal = (weights: Record<string, number>) => {
       let topSpecialty = "INTERNAL_MEDICINE";
       let max = 0;
-      Object.entries(counts).forEach(([id, count]) => {
-        if (count > max) {
-          max = count;
+      Object.entries(weights).forEach(([id, score]) => {
+        if (score > max) {
+          max = score;
           topSpecialty = id;
         }
       });
-
       return SPECIALTIES_MAP[topSpecialty] || SPECIALTIES_MAP["INTERNAL_MEDICINE"];
     };
 
@@ -110,21 +128,8 @@ export default function App() {
         "Interesante (y no en el buen sentido)... esto acabará en autopsia.",
         "Hmm, qué poca imaginación... eres tan plano como un ECG de un muerto.",
         "Diagnóstico: Predecible. Prescribo dos dosis de humildad.",
-        "Huelo... mediocridad. Y un poco de miedo ante el bisturí.",
-        "¿Eso es todo? He visto amebas con planes más ambiciosos.",
-        "Tiembla el bisturí... tus nervios están más tensos que una sutura mal hecha.",
-        "Veo un patrón... preocupante. Parece una arritmia de decisiones.",
-        "Inquietante elección. Como recetar morfina para un estornudo.",
-        "¿Quién te dejó entrar? Tu expediente debe ser pura ficción.",
-        "Mmm, arrogante. Tienes el complejo de Dios pero sin los milagros.",
-        "Típico síntoma de aprendiz que se cree eminencia.",
-        "Ni el éter te salvará de esa estupidez que acabas de elegir.",
-        "Ya veo hacia dónde vas. Directo al fracaso clínico.",
-        "¿Esa es tu respuesta final? Pobre alma, tu destino está en cuidados paliativos.",
-        "Sigo buscando tu intelecto... debe estar escondido bajo esa capa."
       ];
       
-      // Filter out used quick mumbles to ensure variety
       const availableMumbles = quickMumbles.filter(m => !usedThoughts.includes(m));
       const mumblePool = availableMumbles.length > 0 ? availableMumbles : quickMumbles;
       const selectedMumble = mumblePool[Math.floor(Math.random() * mumblePool.length)];
@@ -132,25 +137,27 @@ export default function App() {
       setHatThought(selectedMumble);
       setUsedThoughts(prev => [...prev, selectedMumble]);
       
-      // Snappy transition to next question
       setTimeout(() => {
         setCurrentQuestionIdx(prev => prev + 1);
         setIsThinking(false);
-      }, 400);
+        setOptionRatings({});
+      }, 350);
 
-      // Get AI reflection
-      getHatThought([...answers], currentQuestion.text, option.text, usedThoughts).then(thought => {
-        setHatThought(thought);
-        setUsedThoughts(prev => [...prev, thought]);
-      });
+      getHatThought([...answers], currentQuestion.text, topOption.text, usedThoughts)
+        .then(thought => {
+          if (thought && thought !== selectedMumble) {
+            setHatThought(thought);
+            setUsedThoughts(prev => [...prev, thought]);
+          }
+        })
+        .catch(() => {});
     } else {
-      // End of quiz - Reaction to last answer first
       setShowThought(true);
       setHatThought("Ya veo... tu destino está sellado...");
       
       setIsThinking(true);
       setScene('THINK');
-      const finalResult = calculateResultInternal(newAnswers);
+      const finalResult = calculateResultInternal(nextWeights);
       setResult(finalResult);
 
       getFinalJudgment(
@@ -166,6 +173,10 @@ export default function App() {
         setScene('RESULT');
       }, 2000);
     }
+  };
+
+  const handleOptionSelect = async (option: Option) => {
+    handleClassicOptionRate(option.id, 5);
   };
 
   return (
@@ -361,37 +372,66 @@ export default function App() {
               {scene === 'ABOUT' && (
                 <motion.div 
                   key="about"
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="glass-surface p-10 space-y-8 text-parchment font-sans leading-relaxed"
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  className="glass-surface p-6 sm:p-10 space-y-8 text-parchment font-sans leading-relaxed rounded-2xl border border-gold/30 shadow-2xl"
                 >
-                  <div className="flex items-center space-x-4 border-b border-gold/20 pb-4">
+                  <div className="flex items-center space-x-4 border-b border-gold/25 pb-4">
                     <ScrollText className="text-gold" size={32} />
-                    <h2 className="text-3xl font-display font-bold italic tracking-wide magic-shadow">Sabiduría de la Academia</h2>
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-display font-bold text-gold magic-shadow">Sabiduría de la Academia</h2>
+                      <p className="text-xs uppercase tracking-widest text-parchment/80">El Manifiesto de Arcanum Medicum</p>
+                    </div>
                   </div>
-                  <div className="space-y-6 text-lg opacity-80 italic">
+                  
+                  <div className="space-y-4 text-base sm:text-lg leading-relaxed text-[#f1e5d1]">
                     <p>
-                      Nuestro sistema de orientación vocacional médica ha sido desarrollado para ayudar a los profesionales y estudiantes a identificar la especialidad que mejor se alinea con su perfil cognitivo, habilidades técnicas y preferencias asistenciales.
+                      Nuestro sistema de orientación vocacional médica ha sido desarrollado para ayudar a médicos y opositores MIR a identificar la especialidad que mejor se alinea con su perfil cognitivo, habilidades técnicas y estilo de vida real.
                     </p>
                     <p>
-                      A través de una serie de dilemas clínicos y situaciones de práctica diaria, el algoritmo analiza cuatro dimensiones clave: Resolución Técnica, Gestión de Crisis, Razonamiento Diagnóstico y Atención Social.
+                      A través de dilemas clínicos y situaciones de práctica hospitalaria diaria, el algoritmo analiza cuatro dimensiones clave: 
+                      <strong className="text-amber-200"> Resolución Técnica</strong>, 
+                      <strong className="text-cyan-200"> Gestión de Crisis</strong>, 
+                      <strong className="text-emerald-200"> Razonamiento Diagnóstico</strong> y 
+                      <strong className="text-rose-200"> Continuidad Humana</strong>.
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-4 pt-2">
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-black/40 border border-gold/20 space-y-1">
+                      <h4 className="font-semibold text-gold text-sm">51 Especialidades Oficiales</h4>
+                      <p className="text-xs text-parchment/85 leading-relaxed">Mapeadas cuantitativamente según guardias, quirófano, contacto con pacientes y régimen laboral.</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-black/40 border border-gold/20 space-y-1">
+                      <h4 className="font-semibold text-gold text-sm">Distancia Vectorial Euclídea</h4>
+                      <p className="text-xs text-parchment/85 leading-relaxed">Cálculo algorítmico objetivo que detecta compatibilidad nuclear y penaliza fricciones insalvables.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gold/15">
                     <button 
                       onClick={() => handleNavigate('HOME')}
-                      className="text-gold uppercase tracking-widest text-xs border-b border-gold/40 pb-1 cursor-pointer"
+                      className="text-gold hover:text-amber-200 uppercase tracking-widest text-xs border-b border-gold/40 hover:border-gold pb-1 cursor-pointer transition-colors"
                     >
                       Regresar al Atrio
                     </button>
-                    <button
-                      onClick={handleDownloadDossier}
-                      className="inline-flex items-center space-x-2 px-4 py-2 bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 hover:border-gold rounded-xl text-xs font-bold tracking-wider uppercase transition-all shadow-sm cursor-pointer ml-auto"
-                    >
-                      <FileDown size={16} />
-                      <span>Descargar Dossier Completo (PDF)</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        onClick={() => handleNavigate('SPECIALTIES')}
+                        className="inline-flex items-center space-x-2 px-4 py-2 bg-gold/10 hover:bg-gold/20 text-gold border border-gold/30 hover:border-gold rounded-xl text-xs font-bold tracking-wider uppercase transition-all shadow-sm cursor-pointer"
+                      >
+                        <BookOpen size={16} />
+                        <span>Ver Especialidades</span>
+                      </button>
+                      <button
+                        onClick={handleDownloadDossier}
+                        className="inline-flex items-center space-x-2 px-4 py-2 bg-gold/20 hover:bg-gold/30 text-gold border border-gold/50 hover:border-gold rounded-xl text-xs font-bold tracking-wider uppercase transition-all shadow-sm cursor-pointer"
+                      >
+                        <FileDown size={16} />
+                        <span>Descargar Dossier (PDF)</span>
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -422,25 +462,36 @@ export default function App() {
                     </button>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Object.values(SPECIALTIES_MAP).map((spec) => (
-                      <div key={spec.id} className="group border-l-2 border-gold/20 pl-6 space-y-2 hover:border-gold transition-colors">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-2xl font-magic text-gold italic">{spec.name}</h3>
+                      <div 
+                        key={spec.id} 
+                        className="group rounded-xl border border-gold/25 bg-[#09111c]/95 p-5 space-y-3 hover:border-gold/60 transition-all shadow-md"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <h3 className="text-xl font-magic font-bold text-parchment group-hover:text-gold transition-colors">{spec.name}</h3>
+                            {spec.hogwartsHouse && (
+                              <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-gold-light border border-gold/30 rounded-full px-2.5 py-0.5 bg-gold/10">
+                                Casa {spec.hogwartsHouse}
+                              </span>
+                            )}
+                          </div>
                           {spec.hogwartsHouse && (
                             <img 
                               src={`/house-${spec.hogwartsHouse.toLowerCase()}.png`} 
                               alt={spec.hogwartsHouse}
-                              className="w-12 h-12 object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                              className="w-10 h-10 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] shrink-0"
                               title={`Afinidad: Casa ${spec.hogwartsHouse}`}
                               referrerPolicy="no-referrer"
                             />
                           )}
                         </div>
-                        <p className="text-parchment/60 font-sans italic">{spec.description}</p>
-                        <div className="flex flex-wrap gap-2 pt-2">
+                        <p className="text-[#ded4be] font-sans text-xs leading-relaxed">{spec.description}</p>
+                        <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gold/10">
+                          <span className="text-[9px] uppercase tracking-wider text-parchment/50">Alternativas:</span>
                           {spec.alternatives.map(alt => (
-                            <span key={alt} className="text-[10px] uppercase tracking-tighter border border-gold-dim px-2 text-gold-dim">{alt}</span>
+                            <span key={alt} className="text-[10px] uppercase tracking-wider border border-gold/25 bg-black/40 px-2 py-0.5 rounded text-gold-dim">{alt}</span>
                           ))}
                         </div>
                       </div>
@@ -582,22 +633,80 @@ export default function App() {
                     </AnimatePresence>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 pt-2">
-                    {currentQuestion.options.map((option) => (
-                      <button
-                        key={option.id}
-                        disabled={isThinking}
-                        onClick={() => handleOptionSelect(option)}
-                        className="group flex items-center justify-between p-3 sm:p-5 border border-gold/30 bg-gold/5 hover:bg-gold/20 hover:border-gold transition-all text-left disabled:opacity-50"
-                      >
-                        <span className="text-parchment group-hover:text-gold transition-colors font-magic text-sm sm:text-lg pr-2 sm:pr-4">
-                          {option.text}
-                        </span>
-                        <span className="text-gold/50 group-hover:text-gold text-base sm:text-xl transition-all flex-shrink-0">
-                          {option.sigil}
-                        </span>
-                      </button>
-                    ))}
+                  {/* Instructions and progress */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gold/15 pb-2 text-xs">
+                    <span className="font-mono text-xs uppercase tracking-wider text-parchment font-semibold">
+                      Puntúa cada una de las 4 opciones de 1 a 5 según tu afinidad:
+                    </span>
+                    <span className="font-mono text-[11px] text-gold">
+                      {currentQuestion.options.filter(opt => typeof optionRatings[opt.id] === 'number').length}/4 valoradas
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pt-2">
+                    {currentQuestion.options.map((option, idx) => {
+                      const currentVal = optionRatings[option.id];
+                      const isRated = typeof currentVal === 'number';
+
+                      return (
+                        <div
+                          key={option.id}
+                          className={`rounded-xl border p-4 sm:p-5 space-y-3 transition-all ${
+                            isRated
+                              ? 'border-gold/50 bg-[#0c1524]/90 shadow-md ring-1 ring-gold/20'
+                              : 'border-gold/25 bg-gold/5'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-2.5">
+                              <span className="font-mono text-xs font-bold text-gold/70 bg-gold/10 border border-gold/30 rounded h-5 w-5 flex items-center justify-center shrink-0 mt-0.5">
+                                {String.fromCharCode(65 + idx)}
+                              </span>
+                              <span className="text-parchment font-magic text-sm sm:text-base leading-snug">
+                                {option.text}
+                              </span>
+                            </div>
+                            <span className="text-gold font-magic text-base shrink-0">
+                              {option.sigil}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between border-t border-gold/10 pt-2 text-xs">
+                            <span className="font-mono text-[10px] uppercase text-parchment/60">
+                              Afinidad (1-5):
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                              {[1, 2, 3, 4, 5].map((val) => (
+                                <button
+                                  key={val}
+                                  type="button"
+                                  onClick={() => handleClassicOptionRate(option.id, val)}
+                                  className={`h-8 w-8 sm:h-9 sm:w-9 rounded-lg border font-mono text-xs font-bold transition-all cursor-pointer ${
+                                    currentVal === val
+                                      ? 'border-gold bg-gradient-to-b from-gold to-amber-600 text-bg-deep shadow-[0_0_12px_rgba(217,119,6,0.6)] scale-105'
+                                      : 'border-gold/20 bg-black/40 text-parchment/70 hover:border-gold/50 hover:bg-gold/10 hover:text-gold'
+                                  }`}
+                                >
+                                  {val}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex justify-end pt-3 border-t border-gold/10">
+                    <button
+                      type="button"
+                      disabled={isThinking}
+                      onClick={handleClassicConfirm}
+                      className="inline-flex items-center gap-2 rounded-xl border border-gold/60 bg-gradient-to-r from-gold/30 via-gold/40 to-gold/30 px-6 py-3 text-xs font-bold uppercase tracking-widest text-parchment shadow-[0_0_20px_rgba(217,119,6,0.3)] transition-all hover:bg-gold/40 hover:text-white cursor-pointer disabled:opacity-50"
+                    >
+                      <span>Confirmar Juicio y Continuar</span>
+                      <ArrowRight size={14} />
+                    </button>
                   </div>
 
                   {/* Decorative ink blot */}
@@ -639,62 +748,27 @@ export default function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="glass-surface p-8 sm:p-12 space-y-10 w-full shadow-2xl text-center relative"
                 >
-                  <div className="space-y-4">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ 
-                          type: "spring",
-                          stiffness: 260,
-                          damping: 20,
-                          delay: 0.2
-                        }}
-                        className="relative w-40 h-40 sm:w-56 sm:h-56 mx-auto mb-6 flex items-center justify-center drop-shadow-[0_0_40px_rgba(255,255,255,0.1)]"
-                      >
-                         {result.hogwartsHouse ? (
-                           <img 
-                            src={`/house-${result.hogwartsHouse.toLowerCase()}.png`} 
-                            alt={result.hogwartsHouse} 
-                            className="w-full h-full object-contain"
-                            referrerPolicy="no-referrer"
-                           />
-                         ) : (
-                           <div className="w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center bg-gold/10 rounded-full border border-gold/30 shadow-[0_0_30px_rgba(197,160,89,0.2)]">
-                             <Stethoscope size={80} className="text-gold" />
-                           </div>
-                         )}
-                      </motion.div>
-                    </AnimatePresence>
+                  {/* Grand House Heraldic Banner with Giant Specialty Title */}
+                  <HouseHeroBanner
+                    house={(result.hogwartsHouse as any) || 'Ravenclaw'}
+                    specialtyName={result.name}
+                    specialtyHeadline={result.rationale}
+                  />
 
-                    <span className="text-medical-teal uppercase tracking-[0.5em] text-[10px] font-sans font-medium">
-                      Su perfil profesional ha sido identificado
-                    </span>
-                    <h2 className="text-4xl sm:text-6xl text-parchment font-display font-bold tracking-widest magic-shadow underline underline-offset-8 decoration-gold/30">
-                      {result.name}
-                    </h2>
-                    {result.hogwartsHouse && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="flex items-center justify-center mt-6"
-                      >
-                        <span className={`text-base sm:text-lg uppercase tracking-[0.4em] font-bold ${
-                          result.hogwartsHouse === 'Gryffindor' ? 'text-[#ae0001]' :
-                          result.hogwartsHouse === 'Slytherin' ? 'text-[#1a472a]' :
-                          result.hogwartsHouse === 'Ravenclaw' ? 'text-[#222f5b]' :
-                          'text-[#eeb939]'
-                        }`}>
-                          Casa {result.hogwartsHouse}
-                        </span>
-                      </motion.div>
-                    )}
-                  </div>
+                  {/* High-Converting Premium Hook (Elevated to Upper Fold) */}
+                  <PremiumHookCard
+                    onUnlockPremium={() => window.location.assign('/?unlock=1')}
+                    onStartExtensive={() => startQuiz('EXTENSIVE')}
+                    topSpecialtyName={result.name}
+                    isExtensive={quizType === 'EXTENSIVE'}
+                  />
 
-                  <div className="space-y-4 text-parchment/90 font-sans text-xl sm:text-2xl leading-relaxed italic max-w-xl mx-auto py-6 border-y border-gold/20">
+                  <div className="space-y-4 text-parchment/90 font-sans text-xl sm:text-2xl leading-relaxed italic max-w-xl mx-auto py-5 border-y border-gold/20">
                     <TypewriterText text={personalizedJudgment} speed={25} />
                   </div>
+
+                  {/* Multidimensional Competency Spider Web / Radar Chart */}
+                  <DimensionsRadarChart answers={answers} specialty={result} />
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-left">
                     <div className="space-y-3">
@@ -715,33 +789,10 @@ export default function App() {
                       </p>
                     </div>
                   </div>
- 
-                  <div className="pt-6 border-t border-gold/20">
-                    <div className="max-w-xl mx-auto space-y-4 border border-gold/30 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-6 text-center sm:p-8">
-                      <div className="inline-flex items-center space-x-2 rounded-full border border-medical-teal/30 bg-medical-teal/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-medical-teal">
-                        <Sparkles size={12} />
-                        <span>Informe premium en la V2</span>
-                      </div>
-                      <h3 className="font-display text-xl font-bold tracking-wide text-parchment sm:text-2xl">
-                        Ranking completo y PDF
-                      </h3>
-                      <p className="text-xs leading-relaxed text-parchment/65 sm:text-sm">
-                        El informe completo con el ranking de 51 especialidades, la comparación de
-                        ejes y el PDF se genera en la versión actual de Arcanum Medicum.
-                      </p>
-                      <a
-                        href="/"
-                        className="inline-flex items-center justify-center gap-2 border border-gold/50 bg-gold/10 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gold transition-colors hover:bg-gold/20"
-                      >
-                        Abrir la versión actual
-                        <ArrowRight size={14} />
-                      </a>
-                    </div>
-                  </div>
 
                   <button
                     onClick={handleStart}
-                    className="mt-8 text-gold-dim hover:text-gold uppercase tracking-widest text-xs transition-colors py-2"
+                    className="mt-6 text-gold-dim hover:text-gold uppercase tracking-widest text-xs transition-colors py-2 cursor-pointer"
                   >
                     Solicitar un Nuevo Juicio
                   </button>

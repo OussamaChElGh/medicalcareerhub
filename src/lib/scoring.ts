@@ -153,20 +153,56 @@ export function aggregateProfile(answers: AnswerRecord[], questionSet: QuestionS
 
     switch (question.kind) {
       case 'forced': {
-        const option = question.options?.find((candidate) => candidate.id === answer.optionId);
-        addNumericObservations(observations, option?.scores, weight);
-        addConstraintObservations(constraintObservations, option?.constraintScores, weight);
+        // Multi-option 1-to-5 rating algorithm
+        if (answer.values && Object.keys(answer.values).length > 0) {
+          for (const option of question.options ?? []) {
+            const rawRating = answer.values[option.id];
+            if (typeof rawRating === 'number') {
+              // Score on 1 to 5 scale
+              // Weight scales with candidate's rated affinity (1 to 5)
+              const optionWeight = weight * (rawRating / 5);
 
-        if (question.matchDimension && option?.matchValue) {
-          if (question.matchDimension === 'A6') {
-            populations.add(option.matchValue as PopulationKey);
-          } else if (question.matchDimension === 'A7') {
-            outcomes.add(option.matchValue as OutcomeKey);
-          } else if (question.matchDimension === 'A9') {
-            environments.add(option.matchValue as EnvironmentKey);
-          } else if (question.matchDimension === 'A10') {
-            const target = question.matchMode === 'reject' ? rejectedSystems : systems;
-            target.add(option.matchValue as SystemKey);
+              if (optionWeight > 0) {
+                addNumericObservations(observations, option.scores, optionWeight);
+                addConstraintObservations(constraintObservations, option.constraintScores, optionWeight);
+              }
+
+              if (question.matchDimension && option.matchValue) {
+                if (rawRating >= 3) {
+                  if (question.matchDimension === 'A6') {
+                    populations.add(option.matchValue as PopulationKey);
+                  } else if (question.matchDimension === 'A7') {
+                    outcomes.add(option.matchValue as OutcomeKey);
+                  } else if (question.matchDimension === 'A9') {
+                    environments.add(option.matchValue as EnvironmentKey);
+                  } else if (question.matchDimension === 'A10') {
+                    if (question.matchMode === 'reject' && rawRating >= 4) {
+                      rejectedSystems.add(option.matchValue as SystemKey);
+                    } else if (question.matchMode !== 'reject') {
+                      systems.add(option.matchValue as SystemKey);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // Legacy fallback for single option selection
+          const option = question.options?.find((candidate) => candidate.id === answer.optionId);
+          addNumericObservations(observations, option?.scores, weight);
+          addConstraintObservations(constraintObservations, option?.constraintScores, weight);
+
+          if (question.matchDimension && option?.matchValue) {
+            if (question.matchDimension === 'A6') {
+              populations.add(option.matchValue as PopulationKey);
+            } else if (question.matchDimension === 'A7') {
+              outcomes.add(option.matchValue as OutcomeKey);
+            } else if (question.matchDimension === 'A9') {
+              environments.add(option.matchValue as EnvironmentKey);
+            } else if (question.matchDimension === 'A10') {
+              const target = question.matchMode === 'reject' ? rejectedSystems : systems;
+              target.add(option.matchValue as SystemKey);
+            }
           }
         }
         break;

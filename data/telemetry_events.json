@@ -1,0 +1,1632 @@
+[
+  {
+    "id": "ev-retention-11",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T10:31:44.850Z",
+    "visitorId": "vis-012",
+    "actionDetail": "copy_decree",
+    "specialtyName": "Medicina Intensiva",
+    "house": "Gryffindor",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-2",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T10:20:15.524Z",
+    "visitorId": "vis-003",
+    "actionDetail": "dossier_download",
+    "specialtyName": "Medicina de Urgencias",
+    "house": "Gryffindor",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-32",
+    "type": "test_start",
+    "timestamp": "2026-10-19T10:18:09.179Z",
+    "visitorId": "vis-033",
+    "mode": "extensive",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-17",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T10:16:47.122Z",
+    "visitorId": "vis-018",
+    "actionDetail": "share_whatsapp",
+    "specialtyName": "Medicina Interna",
+    "house": "Ravenclaw",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-57",
+    "type": "page_view",
+    "timestamp": "2026-10-19T10:03:36.550Z",
+    "visitorId": "vis-058",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-45",
+    "type": "page_view",
+    "timestamp": "2026-10-19T09:53:32.535Z",
+    "visitorId": "vis-046",
+    "page": "/censo",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-16",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T09:39:32.887Z",
+    "visitorId": "vis-017",
+    "mode": "extensive",
+    "specialtyName": "Cardiología",
+    "house": "Ravenclaw",
+    "durationSeconds": 336,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-6",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T09:11:01.739Z",
+    "visitorId": "vis-007",
+    "actionDetail": "share_twitter",
+    "specialtyName": "Medicina Familiar y Comunitaria",
+    "house": "Hufflepuff",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-12",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T09:01:16.898Z",
+    "visitorId": "vis-013",
+    "mode": "extensive",
+    "specialtyName": "Cirugía General",
+    "house": "Slytherin",
+    "durationSeconds": 332,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-19",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T08:45:44.664Z",
+    "visitorId": "vis-020",
+    "mode": "free",
+    "specialtyName": "Medicina Intensiva",
+    "house": "Gryffindor",
+    "durationSeconds": 159,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-1",
+    "type": "test_start",
+    "timestamp": "2026-10-19T08:35:21.653Z",
+    "visitorId": "vis-002",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-2",
+    "type": "page_view",
+    "timestamp": "2026-10-19T07:21:35.939Z",
+    "visitorId": "vis-003",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-1",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T07:15:53.111Z",
+    "visitorId": "vis-002",
+    "actionDetail": "download_pdf",
+    "specialtyName": "Medicina Interna",
+    "house": "Ravenclaw",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-9",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T07:11:40.350Z",
+    "visitorId": "vis-010",
+    "actionDetail": "dossier_download",
+    "specialtyName": "Medicina Interna",
+    "house": "Ravenclaw",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-15",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T07:04:24.870Z",
+    "visitorId": "vis-016",
+    "mode": "free",
+    "specialtyName": "Pediatría",
+    "house": "Hufflepuff",
+    "durationSeconds": 155,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-7",
+    "type": "page_view",
+    "timestamp": "2026-10-19T07:01:06.981Z",
+    "visitorId": "vis-008",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-11",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T06:54:18.730Z",
+    "visitorId": "vis-012",
+    "mode": "free",
+    "specialtyName": "Medicina Intensiva",
+    "house": "Gryffindor",
+    "durationSeconds": 151,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-52",
+    "type": "page_view",
+    "timestamp": "2026-10-19T06:46:59.494Z",
+    "visitorId": "vis-053",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-96",
+    "type": "page_view",
+    "timestamp": "2026-10-19T06:40:41.492Z",
+    "visitorId": "vis-097",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-18",
+    "type": "test_start",
+    "timestamp": "2026-10-19T06:39:22.518Z",
+    "visitorId": "vis-019",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-11",
+    "type": "test_start",
+    "timestamp": "2026-10-19T06:15:06.233Z",
+    "visitorId": "vis-012",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-22",
+    "type": "page_view",
+    "timestamp": "2026-10-19T06:14:02.415Z",
+    "visitorId": "vis-023",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-80",
+    "type": "page_view",
+    "timestamp": "2026-10-19T06:09:28.168Z",
+    "visitorId": "vis-081",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-58",
+    "type": "page_view",
+    "timestamp": "2026-10-19T05:47:31.644Z",
+    "visitorId": "vis-059",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-26",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T05:43:45.177Z",
+    "visitorId": "vis-027",
+    "mode": "free",
+    "specialtyName": "Medicina de Urgencias",
+    "house": "Gryffindor",
+    "durationSeconds": 166,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-90",
+    "type": "page_view",
+    "timestamp": "2026-10-19T05:39:54.886Z",
+    "visitorId": "vis-091",
+    "page": "/censo",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-30",
+    "type": "test_start",
+    "timestamp": "2026-10-19T05:05:45.732Z",
+    "visitorId": "vis-031",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-retention-5",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T04:21:39.579Z",
+    "visitorId": "vis-006",
+    "actionDetail": "return_visit",
+    "specialtyName": "Dermatología",
+    "house": "Slytherin",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-10",
+    "type": "test_start",
+    "timestamp": "2026-10-19T04:11:40.062Z",
+    "visitorId": "vis-011",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-4",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T04:07:48.979Z",
+    "visitorId": "vis-005",
+    "actionDetail": "copy_decree",
+    "specialtyName": "Cirugía General",
+    "house": "Slytherin",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-54",
+    "type": "page_view",
+    "timestamp": "2026-10-19T03:51:58.729Z",
+    "visitorId": "vis-055",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-36",
+    "type": "page_view",
+    "timestamp": "2026-10-19T03:10:04.299Z",
+    "visitorId": "vis-037",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-18",
+    "type": "page_view",
+    "timestamp": "2026-10-19T02:28:13.203Z",
+    "visitorId": "vis-019",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-25",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T02:05:39.219Z",
+    "visitorId": "vis-026",
+    "mode": "free",
+    "specialtyName": "Medicina Interna",
+    "house": "Ravenclaw",
+    "durationSeconds": 165,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-14",
+    "type": "retention_action",
+    "timestamp": "2026-10-19T01:38:54.752Z",
+    "visitorId": "vis-015",
+    "actionDetail": "download_pdf",
+    "specialtyName": "Medicina Familiar y Comunitaria",
+    "house": "Hufflepuff",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-19",
+    "type": "test_start",
+    "timestamp": "2026-10-19T01:19:49.805Z",
+    "visitorId": "vis-020",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-28",
+    "type": "test_start",
+    "timestamp": "2026-10-19T01:13:05.872Z",
+    "visitorId": "vis-029",
+    "mode": "extensive",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-24",
+    "type": "page_view",
+    "timestamp": "2026-10-19T00:53:29.240Z",
+    "visitorId": "vis-025",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-51",
+    "type": "page_view",
+    "timestamp": "2026-10-19T00:39:21.858Z",
+    "visitorId": "vis-052",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-15",
+    "type": "page_view",
+    "timestamp": "2026-10-19T00:33:25.777Z",
+    "visitorId": "vis-016",
+    "page": "/censo",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-28",
+    "type": "test_complete",
+    "timestamp": "2026-10-19T00:12:53.836Z",
+    "visitorId": "vis-029",
+    "mode": "extensive",
+    "specialtyName": "Cirugía General",
+    "house": "Slytherin",
+    "durationSeconds": 348,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-67",
+    "type": "page_view",
+    "timestamp": "2026-10-18T23:57:52.087Z",
+    "visitorId": "vis-068",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-7",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T23:50:16.713Z",
+    "visitorId": "vis-008",
+    "actionDetail": "download_pdf",
+    "specialtyName": "Pediatría",
+    "house": "Hufflepuff",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-85",
+    "type": "page_view",
+    "timestamp": "2026-10-18T23:45:34.075Z",
+    "visitorId": "vis-086",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-6",
+    "type": "page_view",
+    "timestamp": "2026-10-18T23:32:07.553Z",
+    "visitorId": "vis-007",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-retention-12",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T23:17:29.681Z",
+    "visitorId": "vis-013",
+    "actionDetail": "return_visit",
+    "specialtyName": "Cirugía General",
+    "house": "Slytherin",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-20",
+    "type": "page_view",
+    "timestamp": "2026-10-18T23:16:02.709Z",
+    "visitorId": "vis-021",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-5",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T23:15:01.271Z",
+    "visitorId": "vis-006",
+    "mode": "free",
+    "specialtyName": "Dermatología",
+    "house": "Slytherin",
+    "durationSeconds": 145,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-21",
+    "type": "test_start",
+    "timestamp": "2026-10-18T23:09:49.860Z",
+    "visitorId": "vis-022",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-1",
+    "type": "page_view",
+    "timestamp": "2026-10-18T21:50:22.930Z",
+    "visitorId": "vis-002",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-17",
+    "type": "test_start",
+    "timestamp": "2026-10-18T21:40:12.644Z",
+    "visitorId": "vis-018",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-10",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T21:39:42.250Z",
+    "visitorId": "vis-011",
+    "actionDetail": "share_whatsapp",
+    "specialtyName": "Medicina de Urgencias",
+    "house": "Gryffindor",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-16",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T21:23:56.026Z",
+    "visitorId": "vis-017",
+    "actionDetail": "dossier_download",
+    "specialtyName": "Cardiología",
+    "house": "Ravenclaw",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-9",
+    "type": "test_start",
+    "timestamp": "2026-10-18T21:00:35.744Z",
+    "visitorId": "vis-010",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-29",
+    "type": "test_start",
+    "timestamp": "2026-10-18T20:53:15.390Z",
+    "visitorId": "vis-030",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-13",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T20:22:44.255Z",
+    "visitorId": "vis-014",
+    "actionDetail": "share_twitter",
+    "specialtyName": "Dermatología",
+    "house": "Slytherin",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-40",
+    "type": "page_view",
+    "timestamp": "2026-10-18T19:49:48.473Z",
+    "visitorId": "vis-041",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-3",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T19:33:30.454Z",
+    "visitorId": "vis-004",
+    "actionDetail": "share_whatsapp",
+    "specialtyName": "Medicina Intensiva",
+    "house": "Gryffindor",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-4",
+    "type": "test_start",
+    "timestamp": "2026-10-18T18:38:12.301Z",
+    "visitorId": "vis-005",
+    "mode": "extensive",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-8",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T18:29:58.950Z",
+    "visitorId": "vis-009",
+    "actionDetail": "download_pdf",
+    "specialtyName": "Cardiología",
+    "house": "Ravenclaw",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-68",
+    "type": "page_view",
+    "timestamp": "2026-10-18T18:17:00.289Z",
+    "visitorId": "vis-069",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-5",
+    "type": "test_start",
+    "timestamp": "2026-10-18T17:50:02.361Z",
+    "visitorId": "vis-006",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-0",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T17:44:37.861Z",
+    "visitorId": "vis-001",
+    "actionDetail": "download_pdf",
+    "specialtyName": "Cardiología",
+    "house": "Ravenclaw",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-23",
+    "type": "test_start",
+    "timestamp": "2026-10-18T17:40:38.936Z",
+    "visitorId": "vis-024",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-69",
+    "type": "page_view",
+    "timestamp": "2026-10-18T17:38:47.373Z",
+    "visitorId": "vis-070",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-99",
+    "type": "page_view",
+    "timestamp": "2026-10-18T17:26:43.453Z",
+    "visitorId": "vis-100",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-47",
+    "type": "page_view",
+    "timestamp": "2026-10-18T17:23:56.164Z",
+    "visitorId": "vis-048",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-12",
+    "type": "test_start",
+    "timestamp": "2026-10-18T16:55:35.769Z",
+    "visitorId": "vis-013",
+    "mode": "extensive",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-60",
+    "type": "page_view",
+    "timestamp": "2026-10-18T16:53:03.994Z",
+    "visitorId": "vis-061",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-76",
+    "type": "page_view",
+    "timestamp": "2026-10-18T16:26:37.730Z",
+    "visitorId": "vis-077",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-95",
+    "type": "page_view",
+    "timestamp": "2026-10-18T16:24:33.377Z",
+    "visitorId": "vis-096",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-14",
+    "type": "page_view",
+    "timestamp": "2026-10-18T14:59:07.829Z",
+    "visitorId": "vis-015",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-25",
+    "type": "page_view",
+    "timestamp": "2026-10-18T14:46:23.254Z",
+    "visitorId": "vis-026",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-retention-15",
+    "type": "retention_action",
+    "timestamp": "2026-10-18T14:41:52.399Z",
+    "visitorId": "vis-016",
+    "actionDetail": "download_pdf",
+    "specialtyName": "Pediatría",
+    "house": "Hufflepuff",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-74",
+    "type": "page_view",
+    "timestamp": "2026-10-18T14:12:58.633Z",
+    "visitorId": "vis-075",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-7",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T13:55:26.994Z",
+    "visitorId": "vis-008",
+    "mode": "free",
+    "specialtyName": "Pediatría",
+    "house": "Hufflepuff",
+    "durationSeconds": 147,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-91",
+    "type": "page_view",
+    "timestamp": "2026-10-18T12:10:55.070Z",
+    "visitorId": "vis-092",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-3",
+    "type": "test_start",
+    "timestamp": "2026-10-18T12:09:27.594Z",
+    "visitorId": "vis-004",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-41",
+    "type": "page_view",
+    "timestamp": "2026-10-18T11:53:48.346Z",
+    "visitorId": "vis-042",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-75",
+    "type": "page_view",
+    "timestamp": "2026-10-18T11:51:05.736Z",
+    "visitorId": "vis-076",
+    "page": "/censo",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-24",
+    "type": "test_start",
+    "timestamp": "2026-10-18T10:55:22.716Z",
+    "visitorId": "vis-025",
+    "mode": "extensive",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-13",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T10:50:31.438Z",
+    "visitorId": "vis-014",
+    "mode": "free",
+    "specialtyName": "Dermatología",
+    "house": "Slytherin",
+    "durationSeconds": 153,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-29",
+    "type": "page_view",
+    "timestamp": "2026-10-18T10:44:18.440Z",
+    "visitorId": "vis-030",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-2",
+    "type": "test_start",
+    "timestamp": "2026-10-18T10:32:48.438Z",
+    "visitorId": "vis-003",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-39",
+    "type": "page_view",
+    "timestamp": "2026-10-18T10:26:14.357Z",
+    "visitorId": "vis-040",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-21",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T09:45:20.569Z",
+    "visitorId": "vis-022",
+    "mode": "free",
+    "specialtyName": "Dermatología",
+    "house": "Slytherin",
+    "durationSeconds": 161,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-88",
+    "type": "page_view",
+    "timestamp": "2026-10-18T09:25:17.230Z",
+    "visitorId": "vis-089",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-0",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T09:13:16.931Z",
+    "visitorId": "vis-001",
+    "mode": "extensive",
+    "specialtyName": "Cardiología",
+    "house": "Ravenclaw",
+    "durationSeconds": 320,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-8",
+    "type": "page_view",
+    "timestamp": "2026-10-18T08:53:34.845Z",
+    "visitorId": "vis-009",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-94",
+    "type": "page_view",
+    "timestamp": "2026-10-18T08:34:02.415Z",
+    "visitorId": "vis-095",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-49",
+    "type": "page_view",
+    "timestamp": "2026-10-18T07:40:59.479Z",
+    "visitorId": "vis-050",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-8",
+    "type": "test_start",
+    "timestamp": "2026-10-18T06:08:24.422Z",
+    "visitorId": "vis-009",
+    "mode": "extensive",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-18",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T05:35:26.580Z",
+    "visitorId": "vis-019",
+    "mode": "free",
+    "specialtyName": "Medicina de Urgencias",
+    "house": "Gryffindor",
+    "durationSeconds": 158,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-14",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T05:29:33.802Z",
+    "visitorId": "vis-015",
+    "mode": "free",
+    "specialtyName": "Medicina Familiar y Comunitaria",
+    "house": "Hufflepuff",
+    "durationSeconds": 154,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-27",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T05:24:00.241Z",
+    "visitorId": "vis-028",
+    "mode": "free",
+    "specialtyName": "Medicina Intensiva",
+    "house": "Gryffindor",
+    "durationSeconds": 167,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-81",
+    "type": "page_view",
+    "timestamp": "2026-10-18T04:41:36.459Z",
+    "visitorId": "vis-082",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-10",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T04:22:42.016Z",
+    "visitorId": "vis-011",
+    "mode": "free",
+    "specialtyName": "Medicina de Urgencias",
+    "house": "Gryffindor",
+    "durationSeconds": 150,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-0",
+    "type": "test_start",
+    "timestamp": "2026-10-18T04:11:01.445Z",
+    "visitorId": "vis-001",
+    "mode": "extensive",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-17",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T02:58:45.864Z",
+    "visitorId": "vis-018",
+    "mode": "free",
+    "specialtyName": "Medicina Interna",
+    "house": "Ravenclaw",
+    "durationSeconds": 157,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-2",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T02:49:16.249Z",
+    "visitorId": "vis-003",
+    "mode": "free",
+    "specialtyName": "Medicina de Urgencias",
+    "house": "Gryffindor",
+    "durationSeconds": 142,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-66",
+    "type": "page_view",
+    "timestamp": "2026-10-18T02:37:08.247Z",
+    "visitorId": "vis-067",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-9",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T02:34:42.172Z",
+    "visitorId": "vis-010",
+    "mode": "free",
+    "specialtyName": "Medicina Interna",
+    "house": "Ravenclaw",
+    "durationSeconds": 149,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-14",
+    "type": "test_start",
+    "timestamp": "2026-10-18T02:08:59.604Z",
+    "visitorId": "vis-015",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-20",
+    "type": "test_complete",
+    "timestamp": "2026-10-18T01:34:20.328Z",
+    "visitorId": "vis-021",
+    "mode": "extensive",
+    "specialtyName": "Cirugía General",
+    "house": "Slytherin",
+    "durationSeconds": 340,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-59",
+    "type": "page_view",
+    "timestamp": "2026-10-18T01:29:30.876Z",
+    "visitorId": "vis-060",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-64",
+    "type": "page_view",
+    "timestamp": "2026-10-18T01:26:57.897Z",
+    "visitorId": "vis-065",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-35",
+    "type": "test_start",
+    "timestamp": "2026-10-18T01:25:15.668Z",
+    "visitorId": "vis-036",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-55",
+    "type": "page_view",
+    "timestamp": "2026-10-18T01:12:21.400Z",
+    "visitorId": "vis-056",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-87",
+    "type": "page_view",
+    "timestamp": "2026-10-18T01:05:29.979Z",
+    "visitorId": "vis-088",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-34",
+    "type": "test_start",
+    "timestamp": "2026-10-18T00:44:54.999Z",
+    "visitorId": "vis-035",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-97",
+    "type": "page_view",
+    "timestamp": "2026-10-18T00:26:45.617Z",
+    "visitorId": "vis-098",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-70",
+    "type": "page_view",
+    "timestamp": "2026-10-18T00:03:35.398Z",
+    "visitorId": "vis-071",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-38",
+    "type": "test_start",
+    "timestamp": "2026-10-18T00:02:20.054Z",
+    "visitorId": "vis-039",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-48",
+    "type": "page_view",
+    "timestamp": "2026-10-18T00:02:14.960Z",
+    "visitorId": "vis-049",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-27",
+    "type": "test_start",
+    "timestamp": "2026-10-17T23:30:23.930Z",
+    "visitorId": "vis-028",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-15",
+    "type": "test_start",
+    "timestamp": "2026-10-17T23:15:42.118Z",
+    "visitorId": "vis-016",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-28",
+    "type": "page_view",
+    "timestamp": "2026-10-17T22:52:47.247Z",
+    "visitorId": "vis-029",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-16",
+    "type": "test_start",
+    "timestamp": "2026-10-17T22:29:57.567Z",
+    "visitorId": "vis-017",
+    "mode": "extensive",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-19",
+    "type": "page_view",
+    "timestamp": "2026-10-17T22:24:29.130Z",
+    "visitorId": "vis-020",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-7",
+    "type": "test_start",
+    "timestamp": "2026-10-17T22:18:50.469Z",
+    "visitorId": "vis-008",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-8",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T21:55:36.280Z",
+    "visitorId": "vis-009",
+    "mode": "extensive",
+    "specialtyName": "Cardiología",
+    "house": "Ravenclaw",
+    "durationSeconds": 328,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-33",
+    "type": "page_view",
+    "timestamp": "2026-10-17T21:49:01.029Z",
+    "visitorId": "vis-034",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-63",
+    "type": "page_view",
+    "timestamp": "2026-10-17T21:33:57.154Z",
+    "visitorId": "vis-064",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-6",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T21:30:15.764Z",
+    "visitorId": "vis-007",
+    "mode": "free",
+    "specialtyName": "Medicina Familiar y Comunitaria",
+    "house": "Hufflepuff",
+    "durationSeconds": 146,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-46",
+    "type": "page_view",
+    "timestamp": "2026-10-17T20:57:40.008Z",
+    "visitorId": "vis-047",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-56",
+    "type": "page_view",
+    "timestamp": "2026-10-17T20:34:18.522Z",
+    "visitorId": "vis-057",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-72",
+    "type": "page_view",
+    "timestamp": "2026-10-17T20:29:38.762Z",
+    "visitorId": "vis-073",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-34",
+    "type": "page_view",
+    "timestamp": "2026-10-17T20:27:12.663Z",
+    "visitorId": "vis-035",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-21",
+    "type": "page_view",
+    "timestamp": "2026-10-17T19:19:50.404Z",
+    "visitorId": "vis-022",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-13",
+    "type": "test_start",
+    "timestamp": "2026-10-17T18:37:00.371Z",
+    "visitorId": "vis-014",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-4",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T18:25:57.379Z",
+    "visitorId": "vis-005",
+    "mode": "extensive",
+    "specialtyName": "Cirugía General",
+    "house": "Slytherin",
+    "durationSeconds": 324,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-29",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T17:56:43.797Z",
+    "visitorId": "vis-030",
+    "mode": "free",
+    "specialtyName": "Dermatología",
+    "house": "Slytherin",
+    "durationSeconds": 169,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-9",
+    "type": "page_view",
+    "timestamp": "2026-10-17T17:49:12.277Z",
+    "visitorId": "vis-010",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-0",
+    "type": "page_view",
+    "timestamp": "2026-10-17T17:36:23.211Z",
+    "visitorId": "vis-001",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-22",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T17:08:11.017Z",
+    "visitorId": "vis-023",
+    "mode": "free",
+    "specialtyName": "Medicina Familiar y Comunitaria",
+    "house": "Hufflepuff",
+    "durationSeconds": 162,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-23",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T16:55:36.162Z",
+    "visitorId": "vis-024",
+    "mode": "free",
+    "specialtyName": "Pediatría",
+    "house": "Hufflepuff",
+    "durationSeconds": 163,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-71",
+    "type": "page_view",
+    "timestamp": "2026-10-17T16:40:14.428Z",
+    "visitorId": "vis-072",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-12",
+    "type": "page_view",
+    "timestamp": "2026-10-17T16:18:24.159Z",
+    "visitorId": "vis-013",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-78",
+    "type": "page_view",
+    "timestamp": "2026-10-17T16:13:50.718Z",
+    "visitorId": "vis-079",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-complete-1",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T15:40:07.735Z",
+    "visitorId": "vis-002",
+    "mode": "free",
+    "specialtyName": "Medicina Interna",
+    "house": "Ravenclaw",
+    "durationSeconds": 141,
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-13",
+    "type": "page_view",
+    "timestamp": "2026-10-17T15:37:58.491Z",
+    "visitorId": "vis-014",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-37",
+    "type": "page_view",
+    "timestamp": "2026-10-17T15:28:35.520Z",
+    "visitorId": "vis-038",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-89",
+    "type": "page_view",
+    "timestamp": "2026-10-17T15:21:32.161Z",
+    "visitorId": "vis-090",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-10",
+    "type": "page_view",
+    "timestamp": "2026-10-17T14:13:15.948Z",
+    "visitorId": "vis-011",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-86",
+    "type": "page_view",
+    "timestamp": "2026-10-17T14:08:04.217Z",
+    "visitorId": "vis-087",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-39",
+    "type": "test_start",
+    "timestamp": "2026-10-17T14:03:00.017Z",
+    "visitorId": "vis-040",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-32",
+    "type": "page_view",
+    "timestamp": "2026-10-17T13:39:07.203Z",
+    "visitorId": "vis-033",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-38",
+    "type": "page_view",
+    "timestamp": "2026-10-17T13:09:59.110Z",
+    "visitorId": "vis-039",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-11",
+    "type": "page_view",
+    "timestamp": "2026-10-17T13:09:22.910Z",
+    "visitorId": "vis-012",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-24",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T12:49:38.850Z",
+    "visitorId": "vis-025",
+    "mode": "extensive",
+    "specialtyName": "Cardiología",
+    "house": "Ravenclaw",
+    "durationSeconds": 344,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-62",
+    "type": "page_view",
+    "timestamp": "2026-10-17T12:37:03.576Z",
+    "visitorId": "vis-063",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-61",
+    "type": "page_view",
+    "timestamp": "2026-10-17T12:15:39.112Z",
+    "visitorId": "vis-062",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-complete-3",
+    "type": "test_complete",
+    "timestamp": "2026-10-17T11:38:12.189Z",
+    "visitorId": "vis-004",
+    "mode": "free",
+    "specialtyName": "Medicina Intensiva",
+    "house": "Gryffindor",
+    "durationSeconds": 143,
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-37",
+    "type": "test_start",
+    "timestamp": "2026-10-17T10:01:35.168Z",
+    "visitorId": "vis-038",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-22",
+    "type": "test_start",
+    "timestamp": "2026-10-17T09:48:56.665Z",
+    "visitorId": "vis-023",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-6",
+    "type": "test_start",
+    "timestamp": "2026-10-17T08:53:02.708Z",
+    "visitorId": "vis-007",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-30",
+    "type": "page_view",
+    "timestamp": "2026-10-17T08:51:52.276Z",
+    "visitorId": "vis-031",
+    "page": "/censo",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-83",
+    "type": "page_view",
+    "timestamp": "2026-10-17T08:31:29.181Z",
+    "visitorId": "vis-084",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-50",
+    "type": "page_view",
+    "timestamp": "2026-10-17T07:39:05.621Z",
+    "visitorId": "vis-051",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-31",
+    "type": "test_start",
+    "timestamp": "2026-10-17T06:59:44.064Z",
+    "visitorId": "vis-032",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-36",
+    "type": "test_start",
+    "timestamp": "2026-10-17T06:08:15.755Z",
+    "visitorId": "vis-037",
+    "mode": "extensive",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-33",
+    "type": "test_start",
+    "timestamp": "2026-10-17T05:55:39.855Z",
+    "visitorId": "vis-034",
+    "mode": "free",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-84",
+    "type": "page_view",
+    "timestamp": "2026-10-17T05:49:02.271Z",
+    "visitorId": "vis-085",
+    "page": "/grimorio",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-42",
+    "type": "page_view",
+    "timestamp": "2026-10-17T05:43:14.195Z",
+    "visitorId": "vis-043",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-53",
+    "type": "page_view",
+    "timestamp": "2026-10-17T05:00:37.616Z",
+    "visitorId": "vis-054",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-25",
+    "type": "test_start",
+    "timestamp": "2026-10-17T03:04:35.256Z",
+    "visitorId": "vis-026",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-16",
+    "type": "page_view",
+    "timestamp": "2026-10-17T02:37:34.229Z",
+    "visitorId": "vis-017",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-79",
+    "type": "page_view",
+    "timestamp": "2026-10-17T02:15:55.635Z",
+    "visitorId": "vis-080",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-93",
+    "type": "page_view",
+    "timestamp": "2026-10-17T02:13:36.506Z",
+    "visitorId": "vis-094",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-start-20",
+    "type": "test_start",
+    "timestamp": "2026-10-17T02:01:43.641Z",
+    "visitorId": "vis-021",
+    "mode": "extensive",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-26",
+    "type": "page_view",
+    "timestamp": "2026-10-17T01:57:31.518Z",
+    "visitorId": "vis-027",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-73",
+    "type": "page_view",
+    "timestamp": "2026-10-17T01:34:50.256Z",
+    "visitorId": "vis-074",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-92",
+    "type": "page_view",
+    "timestamp": "2026-10-17T01:08:17.727Z",
+    "visitorId": "vis-093",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-start-26",
+    "type": "test_start",
+    "timestamp": "2026-10-16T23:31:42.112Z",
+    "visitorId": "vis-027",
+    "mode": "free",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-17",
+    "type": "page_view",
+    "timestamp": "2026-10-16T22:08:26.369Z",
+    "visitorId": "vis-018",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-31",
+    "type": "page_view",
+    "timestamp": "2026-10-16T21:53:57.982Z",
+    "visitorId": "vis-032",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-5",
+    "type": "page_view",
+    "timestamp": "2026-10-16T21:36:04.253Z",
+    "visitorId": "vis-006",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-35",
+    "type": "page_view",
+    "timestamp": "2026-10-16T20:11:18.701Z",
+    "visitorId": "vis-036",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-65",
+    "type": "page_view",
+    "timestamp": "2026-10-16T19:57:10.883Z",
+    "visitorId": "vis-066",
+    "page": "/censo",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-3",
+    "type": "page_view",
+    "timestamp": "2026-10-16T19:34:26.394Z",
+    "visitorId": "vis-004",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-43",
+    "type": "page_view",
+    "timestamp": "2026-10-16T18:49:20.030Z",
+    "visitorId": "vis-044",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-82",
+    "type": "page_view",
+    "timestamp": "2026-10-16T17:19:26.060Z",
+    "visitorId": "vis-083",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-98",
+    "type": "page_view",
+    "timestamp": "2026-10-16T16:22:22.444Z",
+    "visitorId": "vis-099",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-27",
+    "type": "page_view",
+    "timestamp": "2026-10-16T15:56:30.423Z",
+    "visitorId": "vis-028",
+    "page": "/",
+    "device": "desktop"
+  },
+  {
+    "id": "ev-view-23",
+    "type": "page_view",
+    "timestamp": "2026-10-16T14:28:05.518Z",
+    "visitorId": "vis-024",
+    "page": "/",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-4",
+    "type": "page_view",
+    "timestamp": "2026-10-16T13:58:04.207Z",
+    "visitorId": "vis-005",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-44",
+    "type": "page_view",
+    "timestamp": "2026-10-16T11:51:32.912Z",
+    "visitorId": "vis-045",
+    "page": "/grimorio",
+    "device": "mobile"
+  },
+  {
+    "id": "ev-view-77",
+    "type": "page_view",
+    "timestamp": "2026-10-16T11:28:39.657Z",
+    "visitorId": "vis-078",
+    "page": "/",
+    "device": "mobile"
+  }
+]

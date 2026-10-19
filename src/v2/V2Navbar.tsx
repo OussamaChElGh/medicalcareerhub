@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
+  TrendingUp,
   X,
 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ export type V2NavScene =
   | 'stats'
   | 'oracle'
   | 'about'
+  | 'backoffice'
   | 'result';
 
 interface V2NavbarProps {
@@ -39,6 +41,7 @@ const MENU_ITEMS: { id: V2NavScene; label: string; icon: React.ElementType }[] =
   { id: 'catalog', label: 'Grimorio', icon: Book },
   { id: 'blog', label: 'Crónicas', icon: Newspaper },
   { id: 'stats', label: 'Censo', icon: BarChart3 },
+  { id: 'backoffice', label: 'Backoffice', icon: TrendingUp },
   { id: 'oracle', label: 'Oráculo', icon: MessageCircle },
   { id: 'about', label: 'Origen', icon: Info },
 ];
@@ -144,6 +147,18 @@ export const V2Navbar: React.FC<V2NavbarProps> = ({
         </div>
 
         <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onNavigate('backoffice')}
+            title="Abrir Backoffice y Telemetría del Embudo"
+            className={`hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] uppercase tracking-widest transition-all ${
+              activeScene === 'backoffice'
+                ? 'border-gold bg-gold/20 text-gold shadow-[0_0_10px_rgba(197,160,89,0.3)]'
+                : 'border-gold/30 bg-gold/5 text-parchment/80 hover:border-gold hover:text-gold'
+            }`}
+          >
+            <TrendingUp size={11} className="text-gold" />
+            <span>Backoffice</span>
+          </button>
           <button
             onClick={exportPilot}
             title="Exportar sesiones anónimas del piloto en JSON"
